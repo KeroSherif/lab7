@@ -15,7 +15,7 @@ public class Instructor extends User {
     private List<Integer> createdCourses = new ArrayList<>();
 
     public Instructor() {
-        super(); // Constructor فارغ لـ Jackson
+        super(); 
     }
 
     public Instructor(String userId, String username, String email, String passwordHash) {
@@ -23,7 +23,7 @@ public class Instructor extends User {
         this.createdCourses = new ArrayList<>();
     }
 
-    // Getter & Setter
+    
     public List<Integer> getCreatedCourses() {
         return createdCourses;
     }
@@ -32,5 +32,5 @@ public class Instructor extends User {
         this.createdCourses = createdCourses;
     }
 
-    // يمكن إضافة وظائف خاصة بالـ Instructor لاحقاً مثل: حذف كورس، تعديل كورس، ...
+
 }

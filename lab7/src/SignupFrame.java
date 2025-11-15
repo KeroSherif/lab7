@@ -51,3 +51,47 @@ public class SignupFrame extends JFrame {
         roleBox = new JComboBox<>(new String[]{"Student", "Instructor"});
         p5.add(roleBox);
         add(p5);
+
+        JPanel p6 = new JPanel();
+        signupBtn = new JButton("Create Account");
+        backBtn = new JButton("Back to Login");
+        p6.add(signupBtn);
+        p6.add(backBtn);
+        add(p6);
+
+        signupBtn.addActionListener(e -> signupAction());
+        backBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
+    }
+    
+ private void signupAction() {
+        String user = usernameField.getText().trim();
+        String email = emailField.getText().trim();
+        String pass = new String(passwordField.getPassword());
+        String confirm = new String(confirmPasswordField.getPassword());
+        String role = roleBox.getSelectedItem().toString().toLowerCase();
+
+       if (user.isEmpty() || email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please fill all fields.");
+            return;
+        }
+        if (!email.contains("@") || !email.contains(".")) {
+            JOptionPane.showMessageDialog(this, "Invalid email format.");
+            return;
+        }
+        if (pass.length() < 6) {
+            JOptionPane.showMessageDialog(this, "Password must be at least 6 characters.");
+            return;
+        }
+        if (!pass.equals(confirm)) {
+            JOptionPane.showMessageDialog(this, "Passwords do not match.");
+            return;
+        }
+        
+ JOptionPane.showMessageDialog(this, "Account created successfully!");
+        dispose();
+        new LoginFrame().setVisible(true);
+    }
+}

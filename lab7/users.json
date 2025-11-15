@@ -4,5 +4,5 @@
   "username" : "teacher1",
   "email" : "t1@mail.com",
   "passwordHash" : "123456",
-  "createdCourses" : [ 0 ]
+  "createdCourses" : [ 0, 1 ]
 } ]

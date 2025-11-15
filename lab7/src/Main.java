@@ -33,7 +33,6 @@ public class Main {
         saveData();
     }
 
-    // Load JSON files
     static void loadData() throws Exception {
         File u = new File("users.json");
         File c = new File("courses.json");
@@ -44,13 +43,11 @@ public class Main {
             courses = mapper.readValue(c, new TypeReference<List<Course>>() {});
     }
 
-    // Save JSON files
     static void saveData() throws Exception {
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File("users.json"), users);
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File("courses.json"), courses);
     }
 
-    // Create a new course by instructor
     static void createCourse(String instructorId, String courseTitle) {
         User instructor = null;
         for (User u : users) {
@@ -67,12 +64,10 @@ public class Main {
         Course course = new Course(courses.size(), courseTitle, instructor.getUserId());
         courses.add(course);
 
-        // Add course to instructor's createdCourses
         instructor.getCreatedCourses().add(course.getCourseId());
         System.out.println("Course created: " + courseTitle);
     }
 
-    // Add a lesson to a course
     static void addLesson(int courseId, String lessonTitle, String content) {
         if (courseId < 0 || courseId >= courses.size()) {
             System.out.println("Course not found!");
@@ -83,7 +78,6 @@ public class Main {
         System.out.println("Lesson added: " + lessonTitle);
     }
 
-    // View enrolled students
     static void viewEnrolledStudents(int courseId) {
         if (courseId < 0 || courseId >= courses.size()) {
             System.out.println("Course not found!");

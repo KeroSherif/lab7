@@ -1,1 +1,10 @@
-[]
+[ {
+  "courseId" : 0,
+  "title" : "Java Basics",
+  "instructorId" : "1",
+  "lessons" : [ {
+    "lessonId" : 0,
+    "title" : "Lesson 1",
+    "content" : "Content of Lesson 1"
+  } ]
+} ]

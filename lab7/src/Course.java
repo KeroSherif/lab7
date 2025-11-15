@@ -7,14 +7,34 @@
  *
  * @author monic
  */
+import java.util.ArrayList;
 import java.util.List;
 
 public class Course {
-    public int courseId;
-    public String title;
-    public int instructorId;
-    public List<Lesson> lessons;
-    public List<Integer> enrolledStudents;
+    private int courseId;
+    private String title;
+    private String instructorId;
+    private List<Lesson> lessons = new ArrayList<>();
 
-    public Course() {}
+    public Course() {} // Constructor فارغ لـ Jackson
+
+    public Course(int courseId, String title, String instructorId) {
+        this.courseId = courseId;
+        this.title = title;
+        this.instructorId = instructorId;
+        this.lessons = new ArrayList<>();
+    }
+
+    // Getters & Setters
+    public int getCourseId() { return courseId; }
+    public void setCourseId(int courseId) { this.courseId = courseId; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getInstructorId() { return instructorId; }
+    public void setInstructorId(String instructorId) { this.instructorId = instructorId; }
+
+    public List<Lesson> getLessons() { return lessons; }
+    public void setLessons(List<Lesson> lessons) { this.lessons = lessons; }
 }

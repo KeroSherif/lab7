@@ -7,30 +7,42 @@
  *
  * @author monic
  */
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Instructor extends User {
+@JsonTypeName("instructor") 
+public class Instructor extends User { 
 
-    private List<Integer> createdCourses = new ArrayList<>();
+    private List<String> createdCourses; 
 
+   
     public Instructor() {
         super(); 
-    }
-
-    public Instructor(String userId, String username, String email, String passwordHash) {
-        super(userId, "instructor", username, email, passwordHash);
         this.createdCourses = new ArrayList<>();
     }
 
-    
-    public List<Integer> getCreatedCourses() {
+    public Instructor(String userId, String username, String email, String passwordHash) {
+        super(userId, "instructor", username, email, passwordHash); 
+        this.createdCourses = new ArrayList<>();
+    }
+
+    public List<String> getCreatedCourses() {
         return createdCourses;
     }
 
-    public void setCreatedCourses(List<Integer> createdCourses) {
+    public void setCreatedCourses(List<String> createdCourses) {
         this.createdCourses = createdCourses;
     }
+  
+    public void addCreatedCourse(String courseId) {
+        if (!this.createdCourses.contains(courseId)) {
+            this.createdCourses.add(courseId);
+        }
+    }
 
-
+   
+    public void removeCreatedCourse(String courseId) {
+        this.createdCourses.remove(courseId);
+    }
 }

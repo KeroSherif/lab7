@@ -20,13 +20,12 @@ public class Main {
     static List<Course> courses = new ArrayList<>();
 
     public static void main(String[] args) throws Exception {
-        // Load data from JSON
+
         loadData();
 
-        // تجربة إنشاء كورس جديد
+        
         createCourse("1", "Java Basics");
 
-        // تجربة إضافة درس للكورس
         addLesson(0, "Lesson 1", "Content of Lesson 1");
 
         // عرض الطلاب المسجلين (مثال)

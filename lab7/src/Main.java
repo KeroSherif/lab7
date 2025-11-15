@@ -28,10 +28,8 @@ public class Main {
 
         addLesson(0, "Lesson 1", "Content of Lesson 1");
 
-        // عرض الطلاب المسجلين (مثال)
         viewEnrolledStudents(0);
 
-        // حفظ البيانات بعد أي تعديل
         saveData();
     }
 

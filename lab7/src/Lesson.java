@@ -12,7 +12,7 @@ public class Lesson {
     private String title;
     private String content;
 
-    public Lesson() {} // Constructor فارغ لـ Jackson
+    public Lesson() {} 
 
     public Lesson(int lessonId, String title, String content) {
         this.lessonId = lessonId;
@@ -20,7 +20,6 @@ public class Lesson {
         this.content = content;
     }
 
-    // Getters & Setters
     public int getLessonId() { return lessonId; }
     public void setLessonId(int lessonId) { this.lessonId = lessonId; }
 

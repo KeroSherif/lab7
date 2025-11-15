@@ -1,1 +1,11 @@
 
+[
+  {
+    "userId": 1,
+    "role": "instructor",
+    "username": "teacher1",
+    "email": "t1@mail.com",
+    "passwordHash": "123456",
+    "createdCourses": []
+  }
+]

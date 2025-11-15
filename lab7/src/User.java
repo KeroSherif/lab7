@@ -12,14 +12,14 @@ import java.util.List;
 
 public class User {
     private String userId;
-    private String role; // "student" أو "instructor"
+    private String role; 
     private String username;
     private String email;
     private String passwordHash;
     private List<Integer> createdCourses = new ArrayList<>();
 
-    public User() {} // Constructor فارغ لـ Jackson
-
+    public User() {} 
+    
     public User(String userId, String role, String username, String email, String passwordHash) {
         this.userId = userId;
         this.role = role;
@@ -29,7 +29,7 @@ public class User {
         this.createdCourses = new ArrayList<>();
     }
 
-    // Getters & Setters
+  
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
 

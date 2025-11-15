@@ -16,7 +16,7 @@ public class Course {
     private String instructorId;
     private List<Lesson> lessons = new ArrayList<>();
 
-    public Course() {} // Constructor فارغ لـ Jackson
+    public Course() {} 
 
     public Course(int courseId, String title, String instructorId) {
         this.courseId = courseId;
@@ -25,7 +25,6 @@ public class Course {
         this.lessons = new ArrayList<>();
     }
 
-    // Getters & Setters
     public int getCourseId() { return courseId; }
     public void setCourseId(int courseId) { this.courseId = courseId; }
 

@@ -11,24 +11,19 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package lab7;
 
-/**
- *
- * @author marina sherif
- */
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-// Annotations علشان Jackson يفرق بين Student و Instructor وقت التحويل
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "role")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Student.class, name = "student"),
     @JsonSubTypes.Type(value = Instructor.class, name = "instructor")
 })
-public abstract class User { // abstract class
+public abstract class User { 
     protected String userId;
-    protected String role; // "student" أو "instructor"
+    protected String role; 
     protected String username;
     protected String email;
     protected String passwordHash; 

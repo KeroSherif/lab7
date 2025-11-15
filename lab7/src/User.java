@@ -7,22 +7,18 @@
  *
  * @author monic
  */
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import java.util.ArrayList;
+import java.util.List;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "role")
-@JsonSubTypes({
-    @JsonSubTypes.Type(value = Student.class, name = "student"),
-    @JsonSubTypes.Type(value = Instructor.class, name = "instructor")
-})
-public abstract class User { // abstract class
-    protected String userId;
-    protected String role; // "student" أو "instructor"
-    protected String username;
-    protected String email;
-    protected String passwordHash; // SHA-256 hash
+public class User {
+    private String userId;
+    private String role; // "student" أو "instructor"
+    private String username;
+    private String email;
+    private String passwordHash;
+    private List<Integer> createdCourses = new ArrayList<>();
 
-    public User() {} // Constructor فاضي لـ Jackson
+    public User() {} // Constructor فارغ لـ Jackson
 
     public User(String userId, String role, String username, String email, String passwordHash) {
         this.userId = userId;
@@ -30,46 +26,25 @@ public abstract class User { // abstract class
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
+        this.createdCourses = new ArrayList<>();
     }
 
-    // Getters and Setters
-    public String getUserId() {
-        return userId;
-    }
+    // Getters & Setters
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-    public String getRole() {
-        return role;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public void setRole(String role) {
-        this.role = role;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getUsername() {
-        return username;
-    }
+    public String getPasswordHash() { return passwordHash; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
+    public List<Integer> getCreatedCourses() { return createdCourses; }
+    public void setCreatedCourses(List<Integer> createdCourses) { this.createdCourses = createdCourses; }
 }

@@ -7,6 +7,15 @@
  *
  * @author monic
  */
+import java.util.List;
+
 public class User {
-    
+    public int userId;
+    public String role;
+    public String username;
+    public String email;
+    public String passwordHash;
+    public List<Integer> createdCourses;
+
+    public User() {}
 }

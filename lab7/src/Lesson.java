@@ -8,5 +8,9 @@
  * @author monic
  */
 public class Lesson {
-    
+    public int lessonId;
+    public String title;
+    public String content;
+
+    public Lesson() {}
 }

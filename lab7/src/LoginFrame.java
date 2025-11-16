@@ -11,8 +11,6 @@ import java.awt.event.ActionListener;
  *
  * @author DANAH
  */
-
-
 public class LoginFrame extends JFrame {
 
     private JTextField emailField;
@@ -80,14 +78,42 @@ public class LoginFrame extends JFrame {
         try {
             User loggedInUser = loginService.login(email, password);
             JOptionPane.showMessageDialog(this, "Logged In successfully\n" + loggedInUser.getUsername() + "\nWelcome to your second home.");
-            dispose();
-            if (loggedInUser.getRole().equals("student")) { // صححت من equal لـ equals
-                new StudentDashboardFrame(loggedInUser).setVisible(true); // صححت setVisible
-            } else if (loggedInUser.getRole().equals("instructor")) { // صححت من equal لـ equals
-                new InstructorDashboardFrame(loggedInUser).setVisible(true); // صححت setVisible
+
+            // --- التعديل هنا ---
+            // 1. خزن الـ User object بعد login
+            // (ممكن تبقي محتاج تعمله في Dashboard frames)
+            // 2. خلي الواجهة تظهر Dashboard المناسبة
+            dispose(); // مسح شاشة Login
+
+            String userRole = loggedInUser.getRole();
+
+// أضف debugging
+            System.out.println("DEBUG: User role = '" + userRole + "'");
+            System.out.println("DEBUG: User class = " + loggedInUser.getClass().getName());
+
+            if (userRole == null || userRole.isEmpty()) {
+                // جرب تحدد الـ role من نوع الكلاس
+                if (loggedInUser instanceof Student) {
+                    userRole = "student";
+                } else if (loggedInUser instanceof Instructor) {
+                    userRole = "instructor";
+                }
             }
-        } catch(Exception ex){
-            JOptionPane.showMessageDialog(this, "Login Failed:\n" + ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+
+            if ("student".equalsIgnoreCase(userRole)) { // استخدم equalsIgnoreCase
+                new StudentDashboardFrame(loggedInUser).setVisible(true);
+            } else if ("instructor".equalsIgnoreCase(userRole)) {
+                new InstructorDashboardFrame(loggedInUser).setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Unknown user role: '" + userRole + "'. Contact admin.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+                new LoginFrame().setVisible(true);
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Login Failed:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 }

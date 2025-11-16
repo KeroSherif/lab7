@@ -8,16 +8,21 @@ import java.awt.*;
  *
  * @author DANAH
  */
+
+
 public class InstructorDashboardFrame extends JFrame {
 
-    public InstructorDashboardFrame() {
-        setTitle("Instructor Dashboard");
+    private User currentUser; // متغير لتخزين اليوزر
+
+    public InstructorDashboardFrame(User user) { // Constructor جديد
+        this.currentUser = user; // خزن اليوزر
+        setTitle("Instructor Dashboard - " + user.getUsername()); // مثلاً
         setSize(500, 300);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new GridLayout(5, 1));
 
-        JLabel title = new JLabel("Welcome Instructor!", SwingConstants.CENTER);
+        JLabel title = new JLabel("Welcome " + user.getUsername() + "!", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         add(title);
 
@@ -25,7 +30,7 @@ public class InstructorDashboardFrame extends JFrame {
         JButton manageBtn = new JButton("Manage Courses");
         JButton viewStudentsBtn = new JButton("View Enrolled Students");
         JButton logoutBtn = new JButton("Logout");
-        
+
         add(createBtn);
         add(manageBtn);
         add(viewStudentsBtn);
@@ -35,5 +40,8 @@ public class InstructorDashboardFrame extends JFrame {
             dispose();
             new LoginFrame().setVisible(true);
         });
+    }
+    public InstructorDashboardFrame() {
+        this(new Instructor()); // استخدم constructor الجديد بـ User فاضي
     }
 }

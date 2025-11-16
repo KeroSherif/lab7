@@ -59,4 +59,3 @@ public class LoginService {
         return newUser;
     }
 }
-

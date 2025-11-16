@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -76,20 +72,16 @@ public class LoginFrame extends JFrame {
             User loggedInUser = loginService.login(email, password);
             JOptionPane.showMessageDialog(this, "Logged In successfully\n" + loggedInUser.getUsername() + "\nWelcome to your second home.");
 
-            // --- التعديل هنا ---
-            // 1. خزن الـ User object بعد login
-            // (ممكن تبقي محتاج تعمله في Dashboard frames)
-            // 2. خلي الواجهة تظهر Dashboard المناسبة
-            dispose(); // مسح شاشة Login
+            
+            dispose(); 
 
             String userRole = loggedInUser.getRole();
 
-// أضف debugging
             System.out.println("DEBUG: User role = '" + userRole + "'");
             System.out.println("DEBUG: User class = " + loggedInUser.getClass().getName());
 
             if (userRole == null || userRole.isEmpty()) {
-                // جرب تحدد الـ role من نوع الكلاس
+               
                 if (loggedInUser instanceof Student) {
                     userRole = "student";
                 } else if (loggedInUser instanceof Instructor) {

@@ -32,6 +32,12 @@ public class LoginFrame extends JFrame {
         emailPanel.add(emailField);
         add(emailPanel);
         
+        JPanel passPanel = new JPanel();
+        passPanel.add(new JLabel("Password:"));
+        passwordField = new JPasswordField(20);
+        passPanel.add(passwordField);
+        add(passPanel);
+        
         JPanel btnPanel = new JPanel();
         loginBtn = new JButton("Login");
         signupBtn = new JButton("Go to Signup");

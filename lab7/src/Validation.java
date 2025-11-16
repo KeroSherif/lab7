@@ -114,22 +114,32 @@ public class Validation {
         }
         
         userId = userId.trim();
-        if (userId.length() != 36) {
-            return "Invalid user ID format.";
-        }
-        
-        if (userId.charAt(8) != '-' || userId.charAt(13) != '-' || 
-            userId.charAt(18) != '-' || userId.charAt(23) != '-') {
-            return "Invalid user ID format.";
-        }
-        
-        for (int i = 0; i < userId.length(); i++) {
-            if (i == 8 || i == 13 || i == 18 || i == 23) {
-                continue;
-            }
-            char c = userId.charAt(i);
-            if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+        if (userId.length() == 36) {
+            
+            if (userId.charAt(8) != '-' || userId.charAt(13) != '-' || 
+                userId.charAt(18) != '-' || userId.charAt(23) != '-') {
                 return "Invalid user ID format.";
+            }
+            
+            for (int i = 0; i < userId.length(); i++) {
+                if (i == 8 || i == 13 || i == 18 || i == 23) {
+                    continue;
+                }
+                char c = userId.charAt(i);
+                if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'))) {
+                    return "Invalid user ID format.";
+                }
+            }
+            return "";
+        }
+        
+        if (userId.length() < 1 || userId.length() > 50) {
+            return "User ID must be between 1 and 50 characters.";
+        }
+        
+        for (char c : userId.toCharArray()) {
+            if (!Character.isLetterOrDigit(c) && c != '_' && c != '-') {
+                return "User ID can only contain letters, numbers, underscores, and hyphens.";
             }
         }
         
@@ -310,3 +320,4 @@ public class Validation {
         return str == null ? "" : str.trim();
     }
 }
+

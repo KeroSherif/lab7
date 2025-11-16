@@ -95,6 +95,18 @@ public class UserService {
      * Password cannot be changed through this method
      */
     public boolean updateUser(String userId, String newUsername, String newEmail) throws IOException {
+        
+        String validationErrorUsername = Validation.validateUsername(newUsername);
+        if (!validationErrorUsername.isEmpty()) {
+            System.out.println("UserService: " + validationErrorUsername);
+            return false;
+        }
+        
+        String validationErrorEmail = Validation.validateEmail(newEmail);
+        if (!validationErrorEmail.isEmpty()) {
+            System.out.println("UserService: " + validationErrorEmail);
+            return false;
+        }
         List<User> allUsers = dbManager.loadUsers();
 
         Optional<User> userOpt = allUsers.stream()
@@ -132,6 +144,11 @@ public class UserService {
      * Updates a user's password
      */
     public boolean updateUserPassword(String userId, String oldPassword, String newPassword) throws IOException {
+       String validationError = Validation.validatePassword(newPassword);
+        if (!validationError.isEmpty()) {
+            System.out.println("UserService: " + validationError);
+            return false;
+        }
         List<User> allUsers = dbManager.loadUsers();
 
         Optional<User> userOpt = allUsers.stream()

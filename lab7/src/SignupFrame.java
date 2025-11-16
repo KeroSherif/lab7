@@ -14,8 +14,10 @@ public class SignupFrame extends JFrame {
     private JPasswordField passwordField, confirmPasswordField;
     private JComboBox<String> roleBox;
     private JButton signupBtn, backBtn;
+    private LoginService loginService;
 
     public SignupFrame() {
+        this.loginService = new LoginService(JasonDatabaseManager.getInstance());
         setTitle("Signup");
         setSize(450, 400);
         setLocationRelativeTo(null);
@@ -89,9 +91,13 @@ public class SignupFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Passwords do not match.");
             return;
         }
-        
- JOptionPane.showMessageDialog(this, "Account created successfully!");
-        dispose();
-        new LoginFrame().setVisible(true);
+        try{
+             User newUser = loginService.signup(user, email, pass, role);
+             JOptionPane.showMessageDialog(this, "Account Created Successfully! Please Login in.");
+             dispose();
+             new LoginFrame().setVisiable(true);
+         }catech(Exception ex){
+             JOptionPane.showMessageDialog(this, "Signup Failed:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+         }    
     }
 }

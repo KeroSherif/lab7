@@ -107,15 +107,16 @@ public class InstructorDashboardFrame extends JFrame {
             String courseId = idField.getText().trim();
             String title = titleField.getText().trim();
             String description = descArea.getText().trim();
-
-            if (courseId.isEmpty() || title.isEmpty() || description.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog,
-                        "Please fill all fields.",
-                        "Validation Error",
-                        JOptionPane.WARNING_MESSAGE);
+            String err = Validation.validateCourseId(courseId);
+            if (!err.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
+            err = Validation.validateCourse(title, description, currentUser.getUserId());
+            if (!err.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
             try {
                 Course newCourse = instructorService.createCourse(
                         currentUser.getUserId(),

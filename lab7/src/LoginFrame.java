@@ -14,6 +14,8 @@ public class LoginFrame extends JFrame {
     private JTextField emailField;
     private JPasswordField passwordField;
     private JButton loginBtn, signupBtn;
+    private LoginService loginService;
+    private JasonDatabaseManager dbManager;
 
     public LoginFrame() {
         setTitle("Login");
@@ -21,6 +23,8 @@ public class LoginFrame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new GridLayout(4, 1));
+        this.dbManager = JasonDatabaseManager.getInstance();
+        this.loginService = new LoginService(dbManager);
 
         JPanel emailPanel = new JPanel();
         emailPanel.add(new JLabel("Email: "));
@@ -55,14 +59,17 @@ public class LoginFrame extends JFrame {
             JOptionPane.showMessageDialog(this, "Invalid email format.");
             return;
         }
-        
-        String role = email.startsWith("i") ? "instructor" : "student";
-        
-        dispose();
-        if (role.equals("student")) {
-            new StudentDashboardFrame().setVisible(true);
-        } else {
-            new InstructorDashboardFrame().setVisible(true);
-        }
+        try{
+            User loggedInUser = loginService.login(email, password);
+            JOptionPane.showMessageDialog(this, "Logged In successfully\n" + loggedInUser.getUsername() + "\nWelcome to your second home.");
+            dispose();
+            if(loggedInUser.getRole().equal("student")){
+                new StudentDashboardFrame(loggedInUser).setVisiable(true);
+            }else if(loggedInUser.getRole().equal("instructor")){
+                new InstructorDashboardFrame(loggedInUser).setVisiable(true);
+            }
+            catch(Exception ex){
+            JOptionPane.showMessageDialog(this, "Login Failed:\n" + ex.getMessage(),"Error", JOptionPane.ERROR_MESSAGE);
+        }                
     }
 }

@@ -66,15 +66,12 @@ public class LoginFrame extends JFrame {
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please fill all fields.");
+         String validationError = Validation.validateLogin(email, password);
+        if (!validationError.isEmpty()) {
+            JOptionPane.showMessageDialog(this, validationError, "Validation Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        if (!email.contains("@") || !email.contains(".")) {
-            JOptionPane.showMessageDialog(this, "Invalid email format.");
-            return;
-        }
+        
         try {
             User loggedInUser = loginService.login(email, password);
             JOptionPane.showMessageDialog(this, "Logged In successfully\n" + loggedInUser.getUsername() + "\nWelcome to your second home.");

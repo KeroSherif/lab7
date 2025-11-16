@@ -7,6 +7,8 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author DANAH
@@ -21,7 +23,7 @@ public class InstructorDashboardFrame extends JFrame {
         this.currentUser = user;
         this.dbManager = JsonDatabaseManager.getInstance();
         this.instructorService = new InstructorService(dbManager);
-        
+
         setTitle("Instructor Dashboard - " + user.getUsername());
         setSize(600, 400);
         setLocationRelativeTo(null);
@@ -31,10 +33,16 @@ public class InstructorDashboardFrame extends JFrame {
         JLabel title = new JLabel("Welcome " + user.getUsername() + "!", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
         add(title);
-
+        JButton profileBtn = new JButton("My Profile");
         JButton createBtn = new JButton("Create Course");
         JButton manageBtn = new JButton("Manage Courses");
         JButton viewStudentsBtn = new JButton("View Enrolled Students");
+
+        add(profileBtn);
+        profileBtn.addActionListener(e -> {
+            showMyProfile();
+        });
+
         JButton logoutBtn = new JButton("Logout");
 
         add(createBtn);
@@ -111,38 +119,38 @@ public class InstructorDashboardFrame extends JFrame {
 
             if (courseId.isEmpty() || title.isEmpty() || description.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Please fill all fields.",
-                    "Validation Error",
-                    JOptionPane.WARNING_MESSAGE);
+                        "Please fill all fields.",
+                        "Validation Error",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
                 Course newCourse = instructorService.createCourse(
-                    currentUser.getUserId(),
-                    courseId,
-                    title,
-                    description,
-                    currentUser.getUserId()
+                        currentUser.getUserId(),
+                        courseId,
+                        title,
+                        description,
+                        currentUser.getUserId()
                 );
 
                 if (newCourse != null) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Course created successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
+                            "Course created successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
                     dialog.dispose();
                 } else {
                     JOptionPane.showMessageDialog(dialog,
-                        "Failed to create course. Course ID may already exist.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to create course. Course ID may already exist.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Error creating course: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Error creating course: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -157,14 +165,14 @@ public class InstructorDashboardFrame extends JFrame {
             // Load instructor's courses
             List<Course> allCourses = dbManager.loadCourses();
             List<Course> instructorCourses = allCourses.stream()
-                .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
-                .collect(java.util.stream.Collectors.toList());
+                    .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
+                    .collect(java.util.stream.Collectors.toList());
 
             if (instructorCourses.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                    "You haven't created any courses yet.",
-                    "My Courses",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "You haven't created any courses yet.",
+                        "My Courses",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
@@ -215,17 +223,17 @@ public class InstructorDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a course first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a course first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 String courseId = (String) model.getValueAt(selectedRow, 0);
                 Course selectedCourse = instructorCourses.stream()
-                    .filter(c -> c.getCourseId().equals(courseId))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(c -> c.getCourseId().equals(courseId))
+                        .findFirst()
+                        .orElse(null);
 
                 if (selectedCourse != null) {
                     showEditCourseDialog(selectedCourse, dialog);
@@ -237,9 +245,9 @@ public class InstructorDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a course first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a course first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -247,10 +255,10 @@ public class InstructorDashboardFrame extends JFrame {
                 String courseTitle = (String) model.getValueAt(selectedRow, 1);
 
                 int confirm = JOptionPane.showConfirmDialog(dialog,
-                    "Are you sure you want to delete:\n" + courseTitle + " (" + courseId + ")?\n\nThis will unenroll all students!",
-                    "Confirm Delete",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
+                        "Are you sure you want to delete:\n" + courseTitle + " (" + courseId + ")?\n\nThis will unenroll all students!",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     try {
@@ -258,20 +266,20 @@ public class InstructorDashboardFrame extends JFrame {
                         if (success) {
                             model.removeRow(selectedRow);
                             JOptionPane.showMessageDialog(dialog,
-                                "Course deleted successfully!",
-                                "Success",
-                                JOptionPane.INFORMATION_MESSAGE);
+                                    "Course deleted successfully!",
+                                    "Success",
+                                    JOptionPane.INFORMATION_MESSAGE);
                         } else {
                             JOptionPane.showMessageDialog(dialog,
-                                "Failed to delete course.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
+                                    "Failed to delete course.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(dialog,
-                            "Error deleting course: " + ex.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                                "Error deleting course: " + ex.getMessage(),
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
@@ -281,9 +289,9 @@ public class InstructorDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a course first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a course first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -299,9 +307,9 @@ public class InstructorDashboardFrame extends JFrame {
 
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error loading courses: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error loading courses: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -352,39 +360,39 @@ public class InstructorDashboardFrame extends JFrame {
 
             if (newTitle.isEmpty() || newDescription.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Please fill all fields.",
-                    "Validation Error",
-                    JOptionPane.WARNING_MESSAGE);
+                        "Please fill all fields.",
+                        "Validation Error",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
                 boolean success = instructorService.updateCourse(
-                    currentUser.getUserId(),
-                    course.getCourseId(),
-                    newTitle,
-                    newDescription
+                        currentUser.getUserId(),
+                        course.getCourseId(),
+                        newTitle,
+                        newDescription
                 );
 
                 if (success) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Course updated successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
+                            "Course updated successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
                     dialog.dispose();
                     parentDialog.dispose();
                     showManageCoursesDialog();
                 } else {
                     JOptionPane.showMessageDialog(dialog,
-                        "Failed to update course.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to update course.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Error updating course: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Error updating course: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -399,9 +407,9 @@ public class InstructorDashboardFrame extends JFrame {
             Course course = dbManager.getCourseById(courseId);
             if (course == null) {
                 JOptionPane.showMessageDialog(this,
-                    "Course not found.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Course not found.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -423,9 +431,9 @@ public class InstructorDashboardFrame extends JFrame {
             };
 
             for (Lesson lesson : lessons) {
-                String preview = lesson.getContent().length() > 50 
-                    ? lesson.getContent().substring(0, 50) + "..." 
-                    : lesson.getContent();
+                String preview = lesson.getContent().length() > 50
+                        ? lesson.getContent().substring(0, 50) + "..."
+                        : lesson.getContent();
                 model.addRow(new Object[]{
                     lesson.getLessonId(),
                     lesson.getTitle(),
@@ -460,17 +468,17 @@ public class InstructorDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a lesson first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a lesson first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
                 String lessonId = (String) model.getValueAt(selectedRow, 0);
                 Lesson selectedLesson = lessons.stream()
-                    .filter(l -> l.getLessonId().equals(lessonId))
-                    .findFirst()
-                    .orElse(null);
+                        .filter(l -> l.getLessonId().equals(lessonId))
+                        .findFirst()
+                        .orElse(null);
 
                 if (selectedLesson != null) {
                     showEditLessonDialog(courseId, selectedLesson, dialog);
@@ -482,9 +490,9 @@ public class InstructorDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a lesson first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a lesson first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -492,33 +500,33 @@ public class InstructorDashboardFrame extends JFrame {
                 String lessonTitle = (String) model.getValueAt(selectedRow, 1);
 
                 int confirm = JOptionPane.showConfirmDialog(dialog,
-                    "Are you sure you want to delete:\n" + lessonTitle + " (" + lessonId + ")?",
-                    "Confirm Delete",
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
+                        "Are you sure you want to delete:\n" + lessonTitle + " (" + lessonId + ")?",
+                        "Confirm Delete",
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.WARNING_MESSAGE);
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     try {
                         boolean success = instructorService.removeLessonFromCourse(
-                            currentUser.getUserId(), courseId, lessonId);
-                        
+                                currentUser.getUserId(), courseId, lessonId);
+
                         if (success) {
                             model.removeRow(selectedRow);
                             JOptionPane.showMessageDialog(dialog,
-                                "Lesson deleted successfully!",
-                                "Success",
-                                JOptionPane.INFORMATION_MESSAGE);
+                                    "Lesson deleted successfully!",
+                                    "Success",
+                                    JOptionPane.INFORMATION_MESSAGE);
                         } else {
                             JOptionPane.showMessageDialog(dialog,
-                                "Failed to delete lesson.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
+                                    "Failed to delete lesson.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(dialog,
-                            "Error deleting lesson: " + ex.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                                "Error deleting lesson: " + ex.getMessage(),
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
@@ -532,9 +540,9 @@ public class InstructorDashboardFrame extends JFrame {
 
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error loading lessons: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error loading lessons: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -585,9 +593,9 @@ public class InstructorDashboardFrame extends JFrame {
 
             if (lessonId.isEmpty() || title.isEmpty() || content.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Please fill all fields.",
-                    "Validation Error",
-                    JOptionPane.WARNING_MESSAGE);
+                        "Please fill all fields.",
+                        "Validation Error",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -595,27 +603,27 @@ public class InstructorDashboardFrame extends JFrame {
 
             try {
                 boolean success = instructorService.addLessonToCourse(
-                    currentUser.getUserId(), courseId, newLesson);
+                        currentUser.getUserId(), courseId, newLesson);
 
                 if (success) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Lesson added successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
+                            "Lesson added successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
                     dialog.dispose();
                     parentDialog.dispose();
                     showManageCoursesDialog();
                 } else {
                     JOptionPane.showMessageDialog(dialog,
-                        "Failed to add lesson.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to add lesson.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Error adding lesson: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Error adding lesson: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -671,40 +679,40 @@ public class InstructorDashboardFrame extends JFrame {
 
             if (newTitle.isEmpty() || newContent.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Please fill all fields.",
-                    "Validation Error",
-                    JOptionPane.WARNING_MESSAGE);
+                        "Please fill all fields.",
+                        "Validation Error",
+                        JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             try {
                 boolean success = instructorService.updateLesson(
-                    currentUser.getUserId(),
-                    courseId,
-                    lesson.getLessonId(),
-                    newTitle,
-                    newContent
+                        currentUser.getUserId(),
+                        courseId,
+                        lesson.getLessonId(),
+                        newTitle,
+                        newContent
                 );
 
                 if (success) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Lesson updated successfully!",
-                        "Success",
-                        JOptionPane.INFORMATION_MESSAGE);
+                            "Lesson updated successfully!",
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
                     dialog.dispose();
                     parentDialog.dispose();
                     showManageCoursesDialog();
                 } else {
                     JOptionPane.showMessageDialog(dialog,
-                        "Failed to update lesson.",
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Failed to update lesson.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             } catch (IOException ex) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Error updating lesson: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Error updating lesson: " + ex.getMessage(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -719,14 +727,14 @@ public class InstructorDashboardFrame extends JFrame {
             // Load instructor's courses
             List<Course> allCourses = dbManager.loadCourses();
             List<Course> instructorCourses = allCourses.stream()
-                .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
-                .collect(java.util.stream.Collectors.toList());
+                    .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
+                    .collect(java.util.stream.Collectors.toList());
 
             if (instructorCourses.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                    "You haven't created any courses yet.",
-                    "View Students",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "You haven't created any courses yet.",
+                        "View Students",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
@@ -771,9 +779,9 @@ public class InstructorDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a course first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a course first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -789,78 +797,239 @@ public class InstructorDashboardFrame extends JFrame {
 
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error loading courses: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error loading courses: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     // ==================== Show Course Students ====================
-    private void showCourseStudentsDialog(String courseId, String courseTitle) {
-        try {
-            List<Student> students = instructorService.getEnrolledStudents(
+    // Inside InstructorDashboardFrame class, in the showCourseStudentsDialog method
+private void showCourseStudentsDialog(String courseId, String courseTitle) {
+    try {
+        List<Student> students = instructorService.getEnrolledStudents(
                 currentUser.getUserId(), courseId);
-
-            if (students.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
+        if (students.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
                     "No students enrolled in this course yet.",
                     "Course Students",
                     JOptionPane.INFORMATION_MESSAGE);
-                return;
+            return;
+        }
+
+        // Create dialog
+        JDialog dialog = new JDialog(this, "Students - " + courseTitle, true);
+        dialog.setSize(800, 500); // Updated size for new column
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+
+        // Create table
+        String[] columns = {"Student ID", "Username", "Email", "Enrolled Courses", "Completed Lessons"}; // Added new column
+        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
             }
-
-            // Create dialog
-            JDialog dialog = new JDialog(this, "Students - " + courseTitle, true);
-            dialog.setSize(700, 400);
-            dialog.setLocationRelativeTo(this);
-            dialog.setLayout(new BorderLayout());
-
-            // Create table
-            String[] columns = {"Student ID", "Username", "Email", "Enrolled Courses"};
-            DefaultTableModel model = new DefaultTableModel(columns, 0) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
+        };
+        for (Student student : students) {
+            // Calculate the number of lessons completed by this student in the current course (courseId)
+            int completedLessonsCount = 0;
+            Map<String, List<String>> studentProgress = student.getProgress();
+            if (studentProgress.containsKey(courseId)) {
+                List<String> completedLessonsForThisCourse = studentProgress.get(courseId);
+                if (completedLessonsForThisCourse != null) {
+                    completedLessonsCount = completedLessonsForThisCourse.size();
                 }
-            };
-
-            for (Student student : students) {
-                model.addRow(new Object[]{
-                    student.getUserId(),
-                    student.getUsername(),
-                    student.getEmail(),
-                    student.getEnrolledCourses().size()
-                });
             }
 
-            JTable table = new JTable(model);
-            table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            JScrollPane scrollPane = new JScrollPane(table);
-            dialog.add(scrollPane, BorderLayout.CENTER);
-
-            // Close button
-            JPanel btnPanel = new JPanel();
-            JButton closeBtn = new JButton("Close");
-            btnPanel.add(closeBtn);
-            dialog.add(btnPanel, BorderLayout.SOUTH);
-
-            closeBtn.addActionListener(e -> {
-                dialog.dispose();
-                showViewStudentsDialog();
+            model.addRow(new Object[]{
+                student.getUserId(),
+                student.getUsername(),
+                student.getEmail(),
+                student.getEnrolledCourses().size(),
+                completedLessonsCount // Populate the new column
             });
+        }
+        JTable table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(table);
+        dialog.add(scrollPane, BorderLayout.CENTER);
 
-            dialog.setVisible(true);
+        // Close button
+        JPanel btnPanel = new JPanel();
+        JButton closeBtn = new JButton("Close");
+        btnPanel.add(closeBtn);
+        dialog.add(btnPanel, BorderLayout.SOUTH);
 
-        } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
+        closeBtn.addActionListener(e -> {
+            dialog.dispose();
+            showViewStudentsDialog();
+        });
+        dialog.setVisible(true);
+    } catch (IOException ex) {
+        JOptionPane.showMessageDialog(this,
                 "Error loading students: " + ex.getMessage(),
                 "Error",
                 JOptionPane.ERROR_MESSAGE);
-        }
     }
-
+}
     // Constructor with no arguments (for compatibility)
     public InstructorDashboardFrame() {
         this(new Instructor());
+    }
+
+    private void showMyProfile() {
+        UserService userService = new UserService(dbManager);
+
+        try {
+            int[] stats = userService.getInstructorStatistics(currentUser.getUserId());
+
+            String message = String.format(
+                    "=== My Profile ===\n\n"
+                    + "User ID: %s\n"
+                    + "Username: %s\n"
+                    + "Email: %s\n"
+                    + "Role: %s\n\n"
+                    + "=== My Statistics ===\n"
+                    + "Created Courses: %d\n"
+                    + "Total Students: %d\n",
+                    currentUser.getUserId(),
+                    currentUser.getUsername(),
+                    currentUser.getEmail(),
+                    currentUser.getRole(),
+                    stats[0],
+                    stats[1]
+            );
+
+            String[] options = {"Edit Profile", "Change Password", "Close"};
+            int choice = JOptionPane.showOptionDialog(this,
+                    message,
+                    "My Profile",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null,
+                    options,
+                    options[2]);
+
+            if (choice == 0) {
+                showEditProfileDialog();
+            } else if (choice == 1) {
+                showChangePasswordDialog();
+            }
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading profile: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showEditProfileDialog() {
+        UserService userService = new UserService(dbManager);
+
+        String newUsername = JOptionPane.showInputDialog(this,
+                "Enter new username:",
+                currentUser.getUsername());
+
+        if (newUsername == null || newUsername.trim().isEmpty()) {
+            return;
+        }
+
+        String newEmail = JOptionPane.showInputDialog(this,
+                "Enter new email:",
+                currentUser.getEmail());
+
+        if (newEmail == null || newEmail.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            boolean success = userService.updateUser(
+                    currentUser.getUserId(),
+                    newUsername.trim(),
+                    newEmail.trim()
+            );
+
+            if (success) {
+                currentUser.setUsername(newUsername.trim());
+                currentUser.setEmail(newEmail.trim());
+                setTitle("Student Dashboard - " + newUsername.trim());
+                JOptionPane.showMessageDialog(this,
+                        "Profile updated successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to update profile. Email may be taken.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error updating profile: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showChangePasswordDialog() {
+        UserService userService = new UserService(dbManager);
+
+        String oldPassword = JOptionPane.showInputDialog(this, "Enter old password:");
+        if (oldPassword == null || oldPassword.isEmpty()) {
+            return;
+        }
+
+        String newPassword = JOptionPane.showInputDialog(this, "Enter new password:");
+        if (newPassword == null || newPassword.isEmpty()) {
+            return;
+        }
+
+        String confirmPassword = JOptionPane.showInputDialog(this, "Confirm new password:");
+        if (confirmPassword == null || confirmPassword.isEmpty()) {
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            JOptionPane.showMessageDialog(this,
+                    "Passwords do not match!",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (newPassword.length() < 6) {
+            JOptionPane.showMessageDialog(this,
+                    "Password must be at least 6 characters.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            boolean success = userService.updateUserPassword(
+                    currentUser.getUserId(),
+                    oldPassword,
+                    newPassword
+            );
+
+            if (success) {
+                JOptionPane.showMessageDialog(this,
+                        "Password changed successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to change password. Old password is incorrect.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error changing password: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

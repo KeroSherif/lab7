@@ -5,17 +5,15 @@
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author DANAH
  */
-
-
-
-
 public class StudentDashboardFrame extends JFrame {
 
     private User currentUser;
@@ -26,12 +24,12 @@ public class StudentDashboardFrame extends JFrame {
         this.currentUser = user;
         this.dbManager = JsonDatabaseManager.getInstance();
         this.studentService = new StudentService(dbManager);
-        
+
         setTitle("Student Dashboard - " + user.getUsername());
-        setSize(600, 400);
+        setSize(600, 450);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(4, 1));
+        setLayout(new GridLayout(5, 1)); // غير من 4 لـ 5
 
         JLabel title = new JLabel("Welcome " + user.getUsername() + "!", SwingConstants.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 20));
@@ -39,23 +37,20 @@ public class StudentDashboardFrame extends JFrame {
 
         JButton browseBtn = new JButton("Browse Courses");
         JButton enrolledBtn = new JButton("My Enrolled Courses");
+        JButton profileBtn = new JButton("My Profile"); // جديد
         JButton logoutBtn = new JButton("Logout");
 
         add(browseBtn);
         add(enrolledBtn);
+        add(profileBtn); // جديد
         add(logoutBtn);
 
-        // Browse All Available Courses
-        browseBtn.addActionListener(e -> {
-            showBrowseCoursesDialog();
-        });
+        browseBtn.addActionListener(e -> showBrowseCoursesDialog());
+        enrolledBtn.addActionListener(e -> showEnrolledCoursesDialog());
 
-        // View Enrolled Courses
-        enrolledBtn.addActionListener(e -> {
-            showEnrolledCoursesDialog();
-        });
+        // My Profile - جديد
+        profileBtn.addActionListener(e -> showMyProfile());
 
-        // Logout
         logoutBtn.addActionListener(e -> {
             dispose();
             new LoginFrame().setVisible(true);
@@ -66,12 +61,12 @@ public class StudentDashboardFrame extends JFrame {
     private void showBrowseCoursesDialog() {
         try {
             List<Course> allCourses = studentService.getAllCourses();
-            
+
             if (allCourses.isEmpty()) {
-                JOptionPane.showMessageDialog(this, 
-                    "No courses available yet.", 
-                    "Browse Courses", 
-                    JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "No courses available yet.",
+                        "Browse Courses",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
@@ -116,10 +111,10 @@ public class StudentDashboardFrame extends JFrame {
             enrollBtn.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(dialog, 
-                        "Please select a course first.", 
-                        "No Selection", 
-                        JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(dialog,
+                            "Please select a course first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
 
@@ -127,29 +122,29 @@ public class StudentDashboardFrame extends JFrame {
                 String courseTitle = (String) model.getValueAt(selectedRow, 1);
 
                 int confirm = JOptionPane.showConfirmDialog(dialog,
-                    "Do you want to enroll in:\n" + courseTitle + " (" + courseId + ")?",
-                    "Confirm Enrollment",
-                    JOptionPane.YES_NO_OPTION);
+                        "Do you want to enroll in:\n" + courseTitle + " (" + courseId + ")?",
+                        "Confirm Enrollment",
+                        JOptionPane.YES_NO_OPTION);
 
                 if (confirm == JOptionPane.YES_OPTION) {
                     try {
                         boolean success = studentService.enrollStudent(currentUser.getUserId(), courseId);
                         if (success) {
                             JOptionPane.showMessageDialog(dialog,
-                                "Successfully enrolled in " + courseTitle + "!",
-                                "Success",
-                                JOptionPane.INFORMATION_MESSAGE);
+                                    "Successfully enrolled in " + courseTitle + "!",
+                                    "Success",
+                                    JOptionPane.INFORMATION_MESSAGE);
                         } else {
                             JOptionPane.showMessageDialog(dialog,
-                                "Failed to enroll. You may already be enrolled.",
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
+                                    "Failed to enroll. You may already be enrolled.",
+                                    "Error",
+                                    JOptionPane.ERROR_MESSAGE);
                         }
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(dialog,
-                            "Error enrolling: " + ex.getMessage(),
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                                "Error enrolling: " + ex.getMessage(),
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 }
             });
@@ -160,33 +155,33 @@ public class StudentDashboardFrame extends JFrame {
 
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error loading courses: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error loading courses: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     // ==================== View Enrolled Courses ====================
     private void showEnrolledCoursesDialog() {
+        // Inside StudentDashboardFrame class, in the showEnrolledCoursesDialog method
         try {
             List<Course> enrolledCourses = studentService.getEnrolledCourses(currentUser.getUserId());
-
             if (enrolledCourses.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                    "You are not enrolled in any courses yet.",
-                    "My Courses",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "You are not enrolled in any courses yet.",
+                        "My Courses",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
             // Create dialog
             JDialog dialog = new JDialog(this, "My Enrolled Courses", true);
-            dialog.setSize(700, 500);
+            dialog.setSize(800, 500); // Slightly wider for new column
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new BorderLayout());
 
             // Create table
-            String[] columns = {"Course ID", "Title", "Description", "Lessons Count"};
+            String[] columns = {"Course ID", "Title", "Description", "Lessons Count", "Progress"}; // Added Progress column
             DefaultTableModel model = new DefaultTableModel(columns, 0) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
@@ -195,14 +190,34 @@ public class StudentDashboardFrame extends JFrame {
             };
 
             for (Course course : enrolledCourses) {
+                // Calculate completed lessons count for this course for the current student
+                int completedLessonsCount = 0;
+                try {
+                    Map<String, List<String>> progress = studentService.getStudentProgress(currentUser.getUserId(), course.getCourseId());
+                    List<String> completedLessons = progress.get(course.getCourseId());
+                    if (completedLessons != null) {
+                        completedLessonsCount = completedLessons.size();
+                    }
+                } catch (IOException ex) {
+                    // Log the error or handle it gracefully, defaulting to 0 completed
+                    System.err.println("Error getting progress for course " + course.getCourseId() + ": " + ex.getMessage());
+                }
+
+                int totalLessonsCount = course.getLessons().size();
+                String progressText = completedLessonsCount + " / " + totalLessonsCount + " Lessons";
+                String statusText = "";
+                if (totalLessonsCount > 0 && completedLessonsCount == totalLessonsCount) {
+                    statusText = " (COMPLETED!)";
+                }
+
                 model.addRow(new Object[]{
                     course.getCourseId(),
                     course.getTitle(),
                     course.getDescription(),
-                    course.getLessons().size()
+                    course.getLessons().size(),
+                    progressText + statusText // Populate the new Progress column
                 });
             }
-
             JTable table = new JTable(model);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
@@ -221,50 +236,72 @@ public class StudentDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a course first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a course first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-
                 String courseId = (String) model.getValueAt(selectedRow, 0);
                 String courseTitle = (String) model.getValueAt(selectedRow, 1);
+
+                // Check if course is completed and show a message before opening lessons
+                try {
+                    if (studentService.isCourseCompleted(currentUser.getUserId(), courseId)) { // Assuming isCourseCompleted is available here
+                        JOptionPane.showMessageDialog(dialog,
+                                "You have already completed this course: " + courseTitle,
+                                "Course Completed",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        // Optionally, you can still open the lessons dialog but inform the user
+                        // Or you can choose to not open it if you prefer
+                        // For now, let's open it but with a clear indication
+                    }
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "Error checking course completion status: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
+                    return; // Don't proceed if there's an error checking status
+                }
+
                 dialog.dispose();
                 showCourseLessonsDialog(courseId, courseTitle);
             });
-
             closeBtn.addActionListener(e -> dialog.dispose());
-
             dialog.setVisible(true);
-
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error loading enrolled courses: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error loading enrolled courses: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     // ==================== View Course Lessons ====================
+    // Inside StudentDashboardFrame class, in the showCourseLessonsDialog method
     private void showCourseLessonsDialog(String courseId, String courseTitle) {
         try {
             List<Lesson> lessons = studentService.getCourseLessons(courseId);
-
             if (lessons.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
-                    "No lessons available in this course yet.",
-                    "Course Lessons",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "No lessons available in this course yet.",
+                        "Course Lessons",
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
             // Get student progress
             Map<String, List<String>> progress = studentService.getStudentProgress(
-                currentUser.getUserId(), courseId);
+                    currentUser.getUserId(), courseId);
             List<String> completedLessons = progress.get(courseId);
+            if (completedLessons == null) {
+                completedLessons = new ArrayList<>();
+            }
+
+            // Check if the course is completed
+            boolean isCourseCompleted = studentService.isCourseCompleted(currentUser.getUserId(), courseId);
 
             // Create dialog
-            JDialog dialog = new JDialog(this, "Lessons - " + courseTitle, true);
+            JDialog dialog = new JDialog(this, "Lessons - " + courseTitle + (isCourseCompleted ? " (COMPLETED!)" : ""), true);
             dialog.setSize(800, 500);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new BorderLayout());
@@ -279,16 +316,15 @@ public class StudentDashboardFrame extends JFrame {
             };
 
             for (Lesson lesson : lessons) {
-                String status = completedLessons.contains(lesson.getLessonId()) 
-                    ? "✓ Completed" 
-                    : "Not Completed";
+                String status = completedLessons.contains(lesson.getLessonId())
+                        ? "✓ Completed"
+                        : "Not Completed";
                 model.addRow(new Object[]{
                     lesson.getLessonId(),
                     lesson.getTitle(),
                     status
                 });
             }
-
             JTable table = new JTable(model);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
@@ -299,6 +335,18 @@ public class StudentDashboardFrame extends JFrame {
             JButton viewContentBtn = new JButton("View Content");
             JButton markCompleteBtn = new JButton("Mark as Completed");
             JButton backBtn = new JButton("Back");
+
+            // Disable "Mark as Completed" button if course is already completed
+            if (isCourseCompleted) {
+                markCompleteBtn.setEnabled(false);
+                markCompleteBtn.setText("Course Completed!");
+            } else {
+                // Only enable if a row is selected
+                table.getSelectionModel().addListSelectionListener(e -> {
+                    markCompleteBtn.setEnabled(table.getSelectedRow() >= 0 && !isCourseCompleted);
+                });
+            }
+
             btnPanel.add(viewContentBtn);
             btnPanel.add(markCompleteBtn);
             btnPanel.add(backBtn);
@@ -309,12 +357,11 @@ public class StudentDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a lesson first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a lesson first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
                     return;
                 }
-
                 String lessonId = (String) model.getValueAt(selectedRow, 0);
                 showLessonContent(courseId, lessonId);
             });
@@ -324,31 +371,65 @@ public class StudentDashboardFrame extends JFrame {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Please select a lesson first.",
-                        "No Selection",
-                        JOptionPane.WARNING_MESSAGE);
+                            "Please select a lesson first.",
+                            "No Selection",
+                            JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                // Check again if course is not already completed before attempting to complete a lesson
+                try {
+                    if (studentService.isCourseCompleted(currentUser.getUserId(), courseId)) {
+                        JOptionPane.showMessageDialog(dialog,
+                                "This course is already marked as completed!",
+                                "Course Completed",
+                                JOptionPane.INFORMATION_MESSAGE);
+                        // Refresh dialog to reflect state
+                        dialog.dispose();
+                        showCourseLessonsDialog(courseId, courseTitle);
+                        return;
+                    }
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(dialog,
+                            "Error checking course completion status: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 String lessonId = (String) model.getValueAt(selectedRow, 0);
                 String lessonTitle = (String) model.getValueAt(selectedRow, 1);
-
                 try {
                     boolean success = studentService.completeLesson(
-                        currentUser.getUserId(), courseId, lessonId);
-                    
+                            currentUser.getUserId(), courseId, lessonId);
                     if (success) {
                         model.setValueAt("✓ Completed", selectedRow, 2);
+                        // Re-check if the entire course is now completed
+                        if (studentService.isCourseCompleted(currentUser.getUserId(), courseId)) {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Congratulations! You have completed the course: " + courseTitle,
+                                    "Course Completed",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                            // Disable the button and update title after completion
+                            markCompleteBtn.setEnabled(false);
+                            markCompleteBtn.setText("Course Completed!");
+                            dialog.setTitle("Lessons - " + courseTitle + " (COMPLETED!)");
+                        } else {
+                            JOptionPane.showMessageDialog(dialog,
+                                    "Lesson '" + lessonTitle + "' marked as completed!",
+                                    "Success",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    } else {
                         JOptionPane.showMessageDialog(dialog,
-                            "Lesson marked as completed!",
-                            "Success",
-                            JOptionPane.INFORMATION_MESSAGE);
+                                "Failed to mark lesson as completed. You might already be enrolled or an error occurred.",
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 } catch (IOException ex) {
                     JOptionPane.showMessageDialog(dialog,
-                        "Error marking lesson: " + ex.getMessage(),
-                        "Error",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Error marking lesson: " + ex.getMessage(),
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             });
 
@@ -358,12 +439,11 @@ public class StudentDashboardFrame extends JFrame {
             });
 
             dialog.setVisible(true);
-
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error loading lessons: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error loading lessons: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -374,9 +454,9 @@ public class StudentDashboardFrame extends JFrame {
 
             if (lesson == null) {
                 JOptionPane.showMessageDialog(this,
-                    "Lesson not found.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Lesson not found.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -393,7 +473,7 @@ public class StudentDashboardFrame extends JFrame {
             contentArea.setWrapStyleWord(true);
             contentArea.setFont(new Font("Arial", Font.PLAIN, 14));
             contentArea.setMargin(new Insets(10, 10, 10, 10));
-            
+
             JScrollPane scrollPane = new JScrollPane(contentArea);
             dialog.add(scrollPane, BorderLayout.CENTER);
 
@@ -401,20 +481,20 @@ public class StudentDashboardFrame extends JFrame {
             if (!lesson.getResources().isEmpty()) {
                 JPanel resourcePanel = new JPanel(new BorderLayout());
                 resourcePanel.setBorder(BorderFactory.createTitledBorder("Resources"));
-                
+
                 JTextArea resourceArea = new JTextArea();
                 resourceArea.setEditable(false);
                 resourceArea.setText(String.join("\n", lesson.getResources()));
                 resourcePanel.add(new JScrollPane(resourceArea), BorderLayout.CENTER);
                 resourcePanel.setPreferredSize(new Dimension(600, 100));
-                
+
                 dialog.add(resourcePanel, BorderLayout.SOUTH);
             }
 
             // Close button
             JButton closeBtn = new JButton("Close");
             closeBtn.addActionListener(e -> dialog.dispose());
-            
+
             JPanel btnPanel = new JPanel();
             btnPanel.add(closeBtn);
             dialog.add(btnPanel, BorderLayout.NORTH);
@@ -423,14 +503,169 @@ public class StudentDashboardFrame extends JFrame {
 
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
-                "Error loading lesson: " + ex.getMessage(),
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error loading lesson: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
     // Constructor with no arguments (for compatibility)
     public StudentDashboardFrame() {
         this(new Student());
+    }
+
+    private void showMyProfile() {
+        UserService userService = new UserService(dbManager);
+
+        try {
+            int[] stats = userService.getStudentStatistics(currentUser.getUserId());
+
+            String message = String.format(
+                    "=== My Profile ===\n\n"
+                    + "User ID: %s\n"
+                    + "Username: %s\n"
+                    + "Email: %s\n"
+                    + "Role: %s\n\n"
+                    + "=== My Statistics ===\n"
+                    + "Enrolled Courses: %d\n"
+                    + "Completed Lessons: %d\n",
+                    currentUser.getUserId(),
+                    currentUser.getUsername(),
+                    currentUser.getEmail(),
+                    currentUser.getRole(),
+                    stats[0],
+                    stats[1]
+            );
+
+            String[] options = {"Edit Profile", "Change Password", "Close"};
+            int choice = JOptionPane.showOptionDialog(this,
+                    message,
+                    "My Profile",
+                    JOptionPane.YES_NO_CANCEL_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE,
+                    null,
+                    options,
+                    options[2]);
+
+            if (choice == 0) { // Edit Profile
+                showEditProfileDialog();
+            } else if (choice == 1) { // Change Password
+                showChangePasswordDialog();
+            }
+
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error loading profile: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showEditProfileDialog() {
+        UserService userService = new UserService(dbManager);
+
+        String newUsername = JOptionPane.showInputDialog(this,
+                "Enter new username:",
+                currentUser.getUsername());
+
+        if (newUsername == null || newUsername.trim().isEmpty()) {
+            return;
+        }
+
+        String newEmail = JOptionPane.showInputDialog(this,
+                "Enter new email:",
+                currentUser.getEmail());
+
+        if (newEmail == null || newEmail.trim().isEmpty()) {
+            return;
+        }
+
+        try {
+            boolean success = userService.updateUser(
+                    currentUser.getUserId(),
+                    newUsername.trim(),
+                    newEmail.trim()
+            );
+
+            if (success) {
+                currentUser.setUsername(newUsername.trim());
+                currentUser.setEmail(newEmail.trim());
+                setTitle("Student Dashboard - " + newUsername.trim());
+                JOptionPane.showMessageDialog(this,
+                        "Profile updated successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to update profile. Email may be taken.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error updating profile: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void showChangePasswordDialog() {
+        UserService userService = new UserService(dbManager);
+
+        String oldPassword = JOptionPane.showInputDialog(this, "Enter old password:");
+        if (oldPassword == null || oldPassword.isEmpty()) {
+            return;
+        }
+
+        String newPassword = JOptionPane.showInputDialog(this, "Enter new password:");
+        if (newPassword == null || newPassword.isEmpty()) {
+            return;
+        }
+
+        String confirmPassword = JOptionPane.showInputDialog(this, "Confirm new password:");
+        if (confirmPassword == null || confirmPassword.isEmpty()) {
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            JOptionPane.showMessageDialog(this,
+                    "Passwords do not match!",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (newPassword.length() < 6) {
+            JOptionPane.showMessageDialog(this,
+                    "Password must be at least 6 characters.",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            boolean success = userService.updateUserPassword(
+                    currentUser.getUserId(),
+                    oldPassword,
+                    newPassword
+            );
+
+            if (success) {
+                JOptionPane.showMessageDialog(this,
+                        "Password changed successfully!",
+                        "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Failed to change password. Old password is incorrect.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error changing password: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

@@ -1,27 +1,27 @@
 [ {
-  "courseId" : 0,
+  "courseId" : "0",
   "title" : "Java Basics",
   "instructorId" : "1",
   "lessons" : [ {
-    "lessonId" : 0,
+    "lessonId" : "0",
     "title" : "Lesson 1",
     "content" : "Content of Lesson 1"
   }, {
-    "lessonId" : 1,
+    "lessonId" : "1",
     "title" : "Lesson 1",
     "content" : "Content of Lesson 1"
   }, {
-    "lessonId" : 2,
+    "lessonId" : "2",
     "title" : "Lesson 1",
     "content" : "Content of Lesson 1"
   } ]
 }, {
-  "courseId" : 1,
+  "courseId" : "1",
   "title" : "Java Basics",
   "instructorId" : "1",
   "lessons" : [ ]
 }, {
-  "courseId" : 2,
+  "courseId" : "2",
   "title" : "Java Basics",
   "instructorId" : "1",
   "lessons" : [ ]

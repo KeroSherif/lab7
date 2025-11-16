@@ -4,23 +4,27 @@
  */
 
 import java.util.*;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 /**
  *
  * @author Kirolos sherif
  */
 
 
+
+
+@JsonTypeName("student") // <-- مهم
 public class Student extends User {
 
     private List<String> enrolledCourses;
     private Map<String, List<String>> progress;
     // progress: key = courseId, value = list of completed lessonIds
 
+    // Constructor فاضي لـ Jackson
     public Student() {
         super(); // لازم تستخدم constructor الـ parent فاضي لـ Jackson
         this.enrolledCourses = new ArrayList<>();
-        this.progress = new HashMap<>();
+        this.progress = new HashMap<>(); // <-- مهم، مش null
     }
 
     public Student(String userId, String username, String email, String passwordHash) {
@@ -42,7 +46,11 @@ public class Student extends User {
     }
 
     public void setProgress(Map<String, List<String>> progress) {
-        this.progress = progress;
+        if (progress == null) {
+            this.progress = new HashMap<>(); // <-- مهم، مش null
+        } else {
+            this.progress = progress;
+        }
     }
 
     public void enrollCourse(String courseId) {
@@ -62,4 +70,3 @@ public class Student extends User {
         }
     }
 }
-

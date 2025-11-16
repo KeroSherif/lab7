@@ -11,19 +11,18 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import java.util.ArrayList;
 import java.util.List;
 
-@JsonTypeName("instructor") 
-public class Instructor extends User { 
+@JsonTypeName("instructor")
+public class Instructor extends User {
 
-    private List<String> createdCourses; 
+    private List<String> createdCourses; // قائمة بـ IDs للكورسات
 
-   
     public Instructor() {
-        super(); 
+        super(); // لازم تستخدم constructor الـ parent فاضي لـ Jackson
         this.createdCourses = new ArrayList<>();
     }
 
     public Instructor(String userId, String username, String email, String passwordHash) {
-        super(userId, "instructor", username, email, passwordHash); 
+        super(userId, "instructor", username, email, passwordHash);
         this.createdCourses = new ArrayList<>();
     }
 
@@ -34,14 +33,13 @@ public class Instructor extends User {
     public void setCreatedCourses(List<String> createdCourses) {
         this.createdCourses = createdCourses;
     }
-  
+
     public void addCreatedCourse(String courseId) {
         if (!this.createdCourses.contains(courseId)) {
             this.createdCourses.add(courseId);
         }
     }
 
-   
     public void removeCreatedCourse(String courseId) {
         this.createdCourses.remove(courseId);
     }

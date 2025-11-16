@@ -2,30 +2,79 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+package lab7;
 
 /**
  *
- * @author monic
+ * @author marina sherif
  */
+
+import java.util.ArrayList;
+import java.util.List;
+
+
 public class Lesson {
-    private int lessonId;
+    private String lessonId;
     private String title;
     private String content;
+    private List<String> resources; // ممكن تكون فاضية (List of URLs or file paths)
 
-    public Lesson() {} 
+    // Constructor فاضي لـ Jackson
+    public Lesson() {
+        this.resources = new ArrayList<>();
+    }
 
-    public Lesson(int lessonId, String title, String content) {
+    // Constructor مع باراميترز
+    public Lesson(String lessonId, String title, String content) {
         this.lessonId = lessonId;
         this.title = title;
         this.content = content;
+        this.resources = new ArrayList<>(); // تبدأ فاضية
     }
 
-    public int getLessonId() { return lessonId; }
-    public void setLessonId(int lessonId) { this.lessonId = lessonId; }
+    // Getters و Setters
+    public String getLessonId() {
+        return lessonId;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setLessonId(String lessonId) {
+        this.lessonId = lessonId;
+    }
 
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public List<String> getResources() {
+        return resources;
+    }
+
+    public void setResources(List<String> resources) {
+        this.resources = resources;
+    }
+
+    // Business Methods 
+   
+    public void addResource(String resource) {
+        if (!this.resources.contains(resource)) {
+            this.resources.add(resource);
+        }
+    }
+
+    
+    public void removeResource(String resource) {
+        this.resources.remove(resource);
+    }
 }

@@ -10,13 +10,12 @@
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Course {
     private String courseId;
     private String title;
     private String description;
     private String instructorId;
-    private List<Lesson> lessons; // قائمة بالدروس
+    private List<Lesson> lessons;
     private List<String> students; // قائمة بـ userIds للطلاب اللي اشتركوا
 
     // Constructor فاضي لـ Jackson
@@ -84,19 +83,17 @@ public class Course {
         this.students = students;
     }
 
-    // Business Method
+    // Business Methods
     public void addStudent(String studentId) {
         if (!this.students.contains(studentId)) {
             this.students.add(studentId);
         }
     }
 
-   
     public void removeStudent(String studentId) {
         this.students.remove(studentId);
     }
 
-   
     public void addLesson(Lesson lesson) {
         this.lessons.add(lesson);
     }
@@ -104,5 +101,4 @@ public class Course {
     public boolean removeLesson(String lessonId) {
         return this.lessons.removeIf(lesson -> lesson.getLessonId().equals(lessonId));
     }
-
 }

@@ -1,10 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class StudentService {
     private JsonDatabaseManager db;
@@ -13,77 +12,194 @@ public class StudentService {
         this.db = db;
     }
 
+    /**
+     * Gets all courses available in the system.
+     */
     public List<Course> getAllCourses() throws IOException {
         return db.loadCourses();
     }
 
+    /**
+     * Enrolls a student in a specific course.
+     * Checks for student and course existence.
+     */
     public boolean enrollStudent(String studentId, String courseId) throws IOException {
-        // 1. جيب القوائم من قاعدة البيانات
         List<User> allUsers = db.loadUsers();
         List<Course> allCourses = db.loadCourses();
 
-        // 2. بحث عن الطالب والكورس في القوائم
         Optional<User> studentOpt = allUsers.stream()
-                .filter(u -> u.getUserId().equals(studentId) && u instanceof Student) // تأكد من النوع
+                .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
 
         Optional<Course> courseOpt = allCourses.stream()
                 .filter(c -> c.getCourseId().equals(courseId))
                 .findFirst();
 
-        // 3. تحقق من وجودهم
         if (studentOpt.isEmpty() || courseOpt.isEmpty()) {
-            System.out.println("Student or Course not found.");
-            return false; // فشل التسجيل
+            System.out.println("StudentService: Student or Course not found.");
+            return false;
         }
 
         Student s = (Student) studentOpt.get();
         Course c = courseOpt.get();
 
-        // 4. تحقق من أن الطالب مش مسجل من قبل
         if (s.getEnrolledCourses().contains(courseId)) {
-            System.out.println("Student already enrolled in course: " + courseId);
-            return false; // فشل التسجيل
+            System.out.println("StudentService: Student already enrolled in course: " + courseId);
+            return false;
         }
 
-        // 5. أضف الكورس لقائمة الكورسات المسجلة في الكائن student
         s.enrollCourse(courseId);
-
-        // 6. أضف الطالب لقائمة الطلاب في الكائن course
         c.addStudent(studentId);
 
-        // 7. احفظ القوائم المحدثة
         db.saveUsers(allUsers);
         db.saveCourses(allCourses);
 
-        System.out.println("Student " + studentId + " enrolled in course " + courseId);
-        return true; // نجح التسجيل
+        System.out.println("StudentService: Student " + studentId + " enrolled in course " + courseId);
+        return true;
     }
 
+    /**
+     * Marks a lesson as completed for a specific student in a specific course.
+     * Checks for student, course, and lesson existence.
+     */
     public boolean completeLesson(String studentId, String courseId, String lessonId) throws IOException {
-        // 1. جيب قائمة المستخدمين
         List<User> allUsers = db.loadUsers();
 
-        // 2. بحث عن الطالب في القائمة
         Optional<User> studentOpt = allUsers.stream()
-                .filter(u -> u.getUserId().equals(studentId) && u instanceof Student) // تأكد من النوع
+                .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
 
-        // 3. تحقق من وجود الطالب
         if (studentOpt.isEmpty()) {
-            System.out.println("Student not found.");
-            return false; // فشل
+            System.out.println("StudentService: Student not found.");
+            return false;
         }
 
         Student s = (Student) studentOpt.get();
 
-        // 4. علّم الدرس على إنه مكتمل في الكائن student
+        // Optional: Check if the student is enrolled in the course
+        if (!s.getEnrolledCourses().contains(courseId)) {
+             System.out.println("StudentService: Student " + studentId + " is not enrolled in course " + courseId);
+             return false; // Or handle differently based on requirements
+        }
+
+        // Optional: Check if the lesson exists in the course (requires loading courses)
+        // This adds complexity, so we assume the lesson exists if the course does for this step.
+        // A more robust check would load the course and verify the lessonId.
+
         s.markLessonCompleted(courseId, lessonId);
 
-        // 5. احفظ قائمة المستخدمين المحدثة
         db.saveUsers(allUsers);
 
-        System.out.println("Lesson " + lessonId + " marked as completed for student " + studentId + " in course " + courseId);
-        return true; // نجح
+        System.out.println("StudentService: Lesson " + lessonId + " marked as completed for student " + studentId + " in course " + courseId);
+        return true;
+    }
+
+    // --- New Methods for Student Features ---
+
+    /**
+     * Gets the courses a specific student is enrolled in.
+     */
+    public List<Course> getEnrolledCourses(String studentId) throws IOException {
+        List<User> allUsers = db.loadUsers();
+        List<Course> allCourses = db.loadCourses();
+
+        Optional<User> studentOpt = allUsers.stream()
+                .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
+                .findFirst();
+
+        if (studentOpt.isEmpty()) {
+            System.out.println("StudentService: Student with ID " + studentId + " not found.");
+            return new ArrayList<>();
+        }
+
+        Student student = (Student) studentOpt.get();
+        List<String> enrolledCourseIds = student.getEnrolledCourses();
+
+        List<Course> enrolledCourses = allCourses.stream()
+                .filter(c -> enrolledCourseIds.contains(c.getCourseId()))
+                .collect(Collectors.toList());
+
+        System.out.println("StudentService: Found " + enrolledCourses.size() + " enrolled courses for student " + studentId);
+        return enrolledCourses;
+    }
+
+    /**
+     * Gets the lessons for a specific course.
+     */
+    public List<Lesson> getCourseLessons(String courseId) throws IOException {
+        List<Course> allCourses = db.loadCourses();
+
+        Optional<Course> courseOpt = allCourses.stream()
+                .filter(c -> c.getCourseId().equals(courseId))
+                .findFirst();
+
+        if (courseOpt.isEmpty()) {
+            System.out.println("StudentService: Course with ID " + courseId + " not found.");
+            return new ArrayList<>();
+        }
+
+        Course course = courseOpt.get();
+        List<Lesson> lessons = course.getLessons();
+
+        System.out.println("StudentService: Found " + lessons.size() + " lessons in course " + courseId);
+        return lessons;
+    }
+
+    /**
+     * Gets a specific lesson by its ID within a specific course.
+     */
+    public Lesson getLessonById(String courseId, String lessonId) throws IOException {
+        List<Course> allCourses = db.loadCourses();
+
+        Optional<Course> courseOpt = allCourses.stream()
+                .filter(c -> c.getCourseId().equals(courseId))
+                .findFirst();
+
+        if (courseOpt.isEmpty()) {
+            System.out.println("StudentService: Course with ID " + courseId + " not found.");
+            return null;
+        }
+
+        Course course = courseOpt.get();
+        Optional<Lesson> lessonOpt = course.getLessons().stream()
+                .filter(l -> l.getLessonId().equals(lessonId))
+                .findFirst();
+
+        if (lessonOpt.isEmpty()) {
+            System.out.println("StudentService: Lesson with ID " + lessonId + " not found in course " + courseId);
+            return null;
+        }
+
+        System.out.println("StudentService: Found lesson " + lessonId + " in course " + courseId);
+        return lessonOpt.get();
+    }
+
+    /**
+     * Gets the progress of a specific student in a specific course.
+     * Returns a map where key is courseId and value is list of completed lesson IDs.
+     */
+    public Map<String, List<String>> getStudentProgress(String studentId, String courseId) throws IOException {
+        List<User> allUsers = db.loadUsers();
+
+        Optional<User> studentOpt = allUsers.stream()
+                .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
+                .findFirst();
+
+        if (studentOpt.isEmpty()) {
+            System.out.println("StudentService: Student with ID " + studentId + " not found.");
+            return null; // Or an empty map
+        }
+
+        Student student = (Student) studentOpt.get();
+        Map<String, List<String>> progress = student.getProgress();
+
+        // Return progress for the specific course only
+        if (progress.containsKey(courseId)) {
+            System.out.println("StudentService: Found progress for student " + studentId + " in course " + courseId);
+            return Map.of(courseId, progress.get(courseId)); // Return a map with only the requested course's progress
+        } else {
+            System.out.println("StudentService: No progress found for student " + studentId + " in course " + courseId);
+            return Map.of(courseId, new ArrayList<>()); // Return an empty list for the course
+        }
     }
 }

@@ -12,7 +12,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class Lesson {
     private String lessonId;
     private String title;
@@ -65,15 +64,13 @@ public class Lesson {
         this.resources = resources;
     }
 
-    // Business Methods 
-   
+    // Business Methods
     public void addResource(String resource) {
         if (!this.resources.contains(resource)) {
             this.resources.add(resource);
         }
     }
 
-    
     public void removeResource(String resource) {
         this.resources.remove(resource);
     }

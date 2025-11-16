@@ -4,10 +4,18 @@
  */
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 /**
  *
  * @author DANAH
  */
+
+
+// لازم تتأكد إن Import لـ LoginService و JsonDatabaseManager موجود
+// import frontend.lab7.LoginService; // أو المكان اللي جايبين منه الكلاسات
+// import frontend.lab7.JsonDatabaseManager;
+
 public class SignupFrame extends JFrame {
 
     private JTextField usernameField, emailField;
@@ -17,7 +25,8 @@ public class SignupFrame extends JFrame {
     private LoginService loginService;
 
     public SignupFrame() {
-        this.loginService = new LoginService(JasonDatabaseManager.getInstance());
+        // استخدم getInstance()
+        this.loginService = new LoginService(JsonDatabaseManager.getInstance());
         setTitle("Signup");
         setSize(450, 400);
         setLocationRelativeTo(null);
@@ -29,25 +38,25 @@ public class SignupFrame extends JFrame {
         usernameField = new JTextField(20);
         p1.add(usernameField);
         add(p1);
-        
+
         JPanel p2 = new JPanel();
         p2.add(new JLabel("Email: "));
         emailField = new JTextField(20);
         p2.add(emailField);
         add(p2);
-        
+
         JPanel p3 = new JPanel();
         p3.add(new JLabel("Password: "));
         passwordField = new JPasswordField(20);
         p3.add(passwordField);
-        add(p3);   
+        add(p3);
 
         JPanel p4 = new JPanel();
         p4.add(new JLabel("Confirm Password: "));
         confirmPasswordField = new JPasswordField(20);
         p4.add(confirmPasswordField);
         add(p4);
-        
+
         JPanel p5 = new JPanel();
         p5.add(new JLabel("Role: "));
         roleBox = new JComboBox<>(new String[]{"Student", "Instructor"});
@@ -61,21 +70,29 @@ public class SignupFrame extends JFrame {
         p6.add(backBtn);
         add(p6);
 
-        signupBtn.addActionListener(e -> signupAction());
-        backBtn.addActionListener(e -> {
-            dispose();
-            new LoginFrame().setVisible(true);
+        signupBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                signupAction();
+            }
+        });
+        backBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                new LoginFrame().setVisible(true);
+            }
         });
     }
-    
- private void signupAction() {
+
+    private void signupAction() {
         String user = usernameField.getText().trim();
         String email = emailField.getText().trim();
         String pass = new String(passwordField.getPassword());
         String confirm = new String(confirmPasswordField.getPassword());
         String role = roleBox.getSelectedItem().toString().toLowerCase();
 
-       if (user.isEmpty() || email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
+        if (user.isEmpty() || email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please fill all fields.");
             return;
         }
@@ -95,9 +112,9 @@ public class SignupFrame extends JFrame {
              User newUser = loginService.signup(user, email, pass, role);
              JOptionPane.showMessageDialog(this, "Account Created Successfully! Please Login in.");
              dispose();
-             new LoginFrame().setVisiable(true);
+             new LoginFrame().setVisible(true); // صححت setVisible
          }catch(Exception ex){
-             JOptionPane.showMessageDialog(this, "Signup Failed:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-         }    
+             JOptionPane.showMessageDialog(this, "Signup Failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+         }
     }
 }

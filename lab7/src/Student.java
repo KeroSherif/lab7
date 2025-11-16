@@ -9,11 +9,19 @@ import java.util.*;
  *
  * @author Kirolos sherif
  */
+
+
 public class Student extends User {
 
-    private List<String> enrolledCourses; 
-    private Map<String, List<String>> progress; 
+    private List<String> enrolledCourses;
+    private Map<String, List<String>> progress;
     // progress: key = courseId, value = list of completed lessonIds
+
+    public Student() {
+        super(); // لازم تستخدم constructor الـ parent فاضي لـ Jackson
+        this.enrolledCourses = new ArrayList<>();
+        this.progress = new HashMap<>();
+    }
 
     public Student(String userId, String username, String email, String passwordHash) {
         super(userId, "student", username, email, passwordHash);
@@ -25,8 +33,16 @@ public class Student extends User {
         return enrolledCourses;
     }
 
+    public void setEnrolledCourses(List<String> enrolledCourses) {
+        this.enrolledCourses = enrolledCourses;
+    }
+
     public Map<String, List<String>> getProgress() {
         return progress;
+    }
+
+    public void setProgress(Map<String, List<String>> progress) {
+        this.progress = progress;
     }
 
     public void enrollCourse(String courseId) {

@@ -1,8 +1,16 @@
 [ {
   "userId" : "1",
-  "role" : "instructor",
+  "role" :"instructor",
   "username" : "teacher1",
   "email" : "t1@mail.com",
   "passwordHash" : "123456",
-  "createdCourses" : [ 0, 1, 2 ]
+  "createdCourses" : [ "0", "1", "2" ]
+}, {
+  "userId" : "U1",
+  "role" : "student",
+  "username" : "kiro",
+  "email" : "kero@gmail.com",
+  "passwordHash" : "8bb0cf6eb9b17d0f7d22b456f121257dc1254e1f01665370476383ea776df414",
+  "enrolledCourses" : [ ],
+  "progress" : { }
 } ]

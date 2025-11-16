@@ -25,6 +25,16 @@ public class StudentService {
      * Checks for student and course existence.
      */
     public boolean enrollStudent(String studentId, String courseId) throws IOException {
+        String err = Validation.validateUserId(studentId);
+        if (!err.isEmpty()) {
+            System.out.println("StudentService: " + err);
+            return false;
+        }
+        err = Validation.validateCourseId(courseId);
+        if (!err.isEmpty()) {
+            System.out.println("StudentService: " + err);
+            return false;
+        }
         List<User> allUsers = db.loadUsers();
         List<Course> allCourses = db.loadCourses();
         Optional<User> studentOpt = allUsers.stream()
@@ -61,6 +71,22 @@ public class StudentService {
      * Checks for student, course, and lesson existence.
      */
     public boolean completeLesson(String studentId, String courseId, String lessonId) throws IOException {
+       String err = Validation.validateUserId(studentId);
+        if (!err.isEmpty()) {
+            System.out.println("StudentService: " + err);
+            return false;
+        }
+        err = Validation.validateCourseId(courseId);
+        if (!err.isEmpty()) {
+            System.out.println("StudentService: " + err);
+            return false;
+        }
+        err = Validation.validateLessonId(lessonId);
+        if (!err.isEmpty()) {
+            System.out.println("StudentService: " + err);
+            return false;
+        }
+        
         List<User> allUsers = db.loadUsers();
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)

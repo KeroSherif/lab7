@@ -96,7 +96,7 @@ public class SignupFrame extends JFrame {
              JOptionPane.showMessageDialog(this, "Account Created Successfully! Please Login in.");
              dispose();
              new LoginFrame().setVisiable(true);
-         }catech(Exception ex){
+         }catch(Exception ex){
              JOptionPane.showMessageDialog(this, "Signup Failed:" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
          }    
     }

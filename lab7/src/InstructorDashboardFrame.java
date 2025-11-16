@@ -344,11 +344,9 @@ public class InstructorDashboardFrame extends JFrame {
             String newTitle = titleField.getText().trim();
             String newDescription = descArea.getText().trim();
 
-            if (newTitle.isEmpty() || newDescription.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog,
-                        "Please fill all fields.",
-                        "Validation Error",
-                        JOptionPane.WARNING_MESSAGE);
+            String err = Validation.validateCourse(newTitle, newDescription, currentUser.getUserId());
+            if (!err.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -571,11 +569,15 @@ public class InstructorDashboardFrame extends JFrame {
             String title = titleField.getText().trim();
             String content = contentArea.getText().trim();
 
-            if (lessonId.isEmpty() || title.isEmpty() || content.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog,
-                        "Please fill all fields.",
-                        "Validation Error",
-                        JOptionPane.WARNING_MESSAGE);
+            String err = Validation.validateLessonId(lessonId);
+            if (!err.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            err = Validation.validateLesson(title, content);
+            if (!err.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -655,11 +657,9 @@ public class InstructorDashboardFrame extends JFrame {
             String newTitle = titleField.getText().trim();
             String newContent = contentArea.getText().trim();
 
-            if (newTitle.isEmpty() || newContent.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog,
-                        "Please fill all fields.",
-                        "Validation Error",
-                        JOptionPane.WARNING_MESSAGE);
+            String err = Validation.validateLesson(newTitle, newContent);
+            if (!err.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
@@ -863,7 +863,7 @@ public class InstructorDashboardFrame extends JFrame {
     }
 
     // Constructor with no arguments (for compatibility)
-    public InstructorDashboardFrame() {
+        public InstructorDashboardFrame() {
         this(new Instructor());
     }
 
@@ -914,15 +914,25 @@ public class InstructorDashboardFrame extends JFrame {
         String newUsername = JOptionPane.showInputDialog(this,
                 "Enter new username:",
                 currentUser.getUsername());
-        if (newUsername == null || newUsername.trim().isEmpty()) {
-            return;
-        }
+        if (newUsername == null) return;
         String newEmail = JOptionPane.showInputDialog(this,
                 "Enter new email:",
                 currentUser.getEmail());
-        if (newEmail == null || newEmail.trim().isEmpty()) {
+        if (newEmail == null) return;
+
+
+        String err = Validation.validateUsername(newUsername.trim());
+        if (!err.isEmpty()) {
+            JOptionPane.showMessageDialog(this, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
+
+        err = Validation.validateEmail(newEmail.trim());
+        if (!err.isEmpty()) {
+            JOptionPane.showMessageDialog(this, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         try {
             boolean success = userService.updateUser(
                     currentUser.getUserId(),
@@ -950,7 +960,6 @@ public class InstructorDashboardFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-
     private void showChangePasswordDialog() {
         UserService userService = new UserService(dbManager);
         String oldPassword = JOptionPane.showInputDialog(this, "Enter old password:");
@@ -965,18 +974,15 @@ public class InstructorDashboardFrame extends JFrame {
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             return;
         }
-        if (!newPassword.equals(confirmPassword)) {
-            JOptionPane.showMessageDialog(this,
-                    "Passwords do not match!",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+        String err = Validation.validatePassword(newPassword);
+        if (!err.isEmpty()) {
+            JOptionPane.showMessageDialog(this, err, "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        if (newPassword.length() < 6) {
-            JOptionPane.showMessageDialog(this,
-                    "Password must be at least 6 characters.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+
+        err = Validation.validatePasswordMatch(newPassword, confirmPassword);
+        if (!err.isEmpty()) {
+            JOptionPane.showMessageDialog(this, err, "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
         try {

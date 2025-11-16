@@ -1,15 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author Kirolos sherif
- */
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,17 +11,21 @@ public class JsonDatabaseManager {
 
     private static final String USERS_FILE = "users.json";
     private static final String COURSES_FILE = "courses.json";
-    private ObjectMapper mapper = new ObjectMapper(); // مثيل واحد لـ ObjectMapper
-    private static JsonDatabaseManager instance = null; // متغير static لـ Singleton
+    private ObjectMapper mapper;
+    private static JsonDatabaseManager instance = null;
 
-    // Constructor خاص (private) لمنع إنشاء كائنات مباشرة
     private JsonDatabaseManager() {
-        // تأكد من وجود الملفات أو انشئها فارغة
+        // إنشاء ObjectMapper بشكل بسيط
+        this.mapper = new ObjectMapper();
+        
+        // تفعيل الـ pretty printing
+        this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
+        
+        // تأكد من وجود الملفات
         initializeFile(USERS_FILE, new ArrayList<User>());
         initializeFile(COURSES_FILE, new ArrayList<Course>());
     }
 
-    // الميثود اللي بترجع الكائن الوحيد (Singleton)
     public static JsonDatabaseManager getInstance() {
         if (instance == null) {
             instance = new JsonDatabaseManager();
@@ -52,18 +47,49 @@ public class JsonDatabaseManager {
         }
     }
 
-    // --- Load Methods ---
-    public List<User> loadUsers() throws IOException {
-        File file = new File(USERS_FILE);
-        return mapper.readValue(file, new TypeReference<List<User>>() {});
+    // Load Methods
+   public List<User> loadUsers() throws IOException {
+    File file = new File(USERS_FILE);
+    
+    // لو الملف مش موجود أو فاضي
+    if (!file.exists() || file.length() == 0) {
+        return new ArrayList<>();
     }
+    
+    try {
+        List<User> users = mapper.readValue(file, new TypeReference<List<User>>() {});
+        
+        // تحقق إن كل user عنده role
+        for (User user : users) {
+            if (user.getRole() == null || user.getRole().isEmpty()) {
+                System.err.println("WARNING: User " + user.getUserId() + " has no role. Fixing...");
+                // حاول تحدد الـ role من نوع الكلاس
+                if (user instanceof Student) {
+                    user.setRole("student");
+                } else if (user instanceof Instructor) {
+                    user.setRole("instructor");
+                }
+            }
+        }
+        
+        return users;
+        
+    } catch (Exception e) {
+        System.err.println("ERROR reading users.json: " + e.getMessage());
+        System.err.println("Please delete users.json and restart the application.");
+        throw e; // ارمي الـ error بدل ما تمسح الملف
+    }
+}
 
     public List<Course> loadCourses() throws IOException {
         File file = new File(COURSES_FILE);
+        if (file.length() == 0) {
+            return new ArrayList<>();
+        }
         return mapper.readValue(file, new TypeReference<List<Course>>() {});
     }
 
-    // --- Save Methods ---
+    // Save Methods
     public void saveUsers(List<User> users) throws IOException {
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File(USERS_FILE), users);
     }
@@ -72,7 +98,7 @@ public class JsonDatabaseManager {
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File(COURSES_FILE), courses);
     }
 
-    // --- Save Single Object Methods ---
+    // Save Single Object Methods
     public void saveUser(User user) throws IOException {
         List<User> users = loadUsers();
         users.add(user);
@@ -85,7 +111,7 @@ public class JsonDatabaseManager {
         saveCourses(courses);
     }
 
-    // --- Helper Methods ---
+    // Helper Methods
     public Optional<User> findUserById(String userId) throws IOException {
         List<User> users = loadUsers();
         return users.stream().filter(u -> u.getUserId().equals(userId)).findFirst();
@@ -117,7 +143,6 @@ public class JsonDatabaseManager {
         return courseOpt.orElse(null);
     }
 
-    // --- Methods Required by LoginService ---
     public User getUserByEmail(String email) throws IOException {
         List<User> users = loadUsers();
         Optional<User> userOpt = users.stream()
@@ -129,7 +154,7 @@ public class JsonDatabaseManager {
     public String getNextUserId() throws IOException {
         List<User> users = loadUsers();
         if (users.isEmpty()) {
-            return "U1"; // أول ID
+            return "U1";
         }
         int maxId = 0;
         for (User u : users) {
@@ -141,11 +166,11 @@ public class JsonDatabaseManager {
                         maxId = num;
                     }
                 } catch (NumberFormatException e) {
-                    continue; // لو الـ ID مش نمط "U" + رقم، اتجاهل
+                    continue;
                 }
             }
         }
-        return "U" + (maxId + 1); // ID الجديد
+        return "U" + (maxId + 1);
     }
 
     public boolean isUserIdDuplicate(String userId) throws IOException {

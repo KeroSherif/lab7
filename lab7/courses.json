@@ -8,6 +8,11 @@
     "title" : "intro",
     "content" : "intro about matrix",
     "resources" : [ ]
+  }, {
+    "lessonId" : "102",
+    "title" : "chapter1",
+    "content" : "how to calc the determnent",
+    "resources" : [ ]
   } ],
   "students" : [ "U1" ]
 }, {

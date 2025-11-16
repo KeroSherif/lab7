@@ -8,8 +8,9 @@
   "progress" : {
     "702" : [ ],
     "704" : [ ],
-    "703" : [ "101" ]
-  }
+    "703" : [ "101", "102" ]
+  },
+  "notifications" : [ "You completed the course: Linear Algebra on Sun Nov 16 22:38:04 EET 2025" ]
 }, {
   "userId" : "U2",
   "role" : "instructor",

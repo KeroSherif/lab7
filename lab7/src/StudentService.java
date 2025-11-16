@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class StudentService {
-
     private JsonDatabaseManager db;
 
     public StudentService(JsonDatabaseManager db) {
@@ -22,17 +21,15 @@ public class StudentService {
     }
 
     /**
-     * Enrolls a student in a specific course. Checks for student and course
-     * existence.
+     * Enrolls a student in a specific course.
+     * Checks for student and course existence.
      */
     public boolean enrollStudent(String studentId, String courseId) throws IOException {
         List<User> allUsers = db.loadUsers();
         List<Course> allCourses = db.loadCourses();
-
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
-
         Optional<Course> courseOpt = allCourses.stream()
                 .filter(c -> c.getCourseId().equals(courseId))
                 .findFirst();
@@ -55,7 +52,6 @@ public class StudentService {
 
         db.saveUsers(allUsers);
         db.saveCourses(allCourses);
-
         System.out.println("StudentService: Student " + studentId + " enrolled in course " + courseId);
         return true;
     }
@@ -66,7 +62,6 @@ public class StudentService {
      */
     public boolean completeLesson(String studentId, String courseId, String lessonId) throws IOException {
         List<User> allUsers = db.loadUsers();
-
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
@@ -80,17 +75,16 @@ public class StudentService {
 
         // Optional: Check if the student is enrolled in the course
         if (!s.getEnrolledCourses().contains(courseId)) {
-            System.out.println("StudentService: Student " + studentId + " is not enrolled in course " + courseId);
-            return false; // Or handle differently based on requirements
+             System.out.println("StudentService: Student " + studentId + " is not enrolled in course " + courseId);
+             return false; // Or handle differently based on requirements
         }
 
         // Optional: Check if the lesson exists in the course (requires loading courses)
         // This adds complexity, so we assume the lesson exists if the course does for this step.
         // A more robust check would load the course and verify the lessonId.
+
         s.markLessonCompleted(courseId, lessonId);
-
         db.saveUsers(allUsers);
-
         System.out.println("StudentService: Lesson " + lessonId + " marked as completed for student " + studentId + " in course " + courseId);
         return true;
     }
@@ -102,7 +96,6 @@ public class StudentService {
     public List<Course> getEnrolledCourses(String studentId) throws IOException {
         List<User> allUsers = db.loadUsers();
         List<Course> allCourses = db.loadCourses();
-
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
@@ -128,7 +121,6 @@ public class StudentService {
      */
     public List<Lesson> getCourseLessons(String courseId) throws IOException {
         List<Course> allCourses = db.loadCourses();
-
         Optional<Course> courseOpt = allCourses.stream()
                 .filter(c -> c.getCourseId().equals(courseId))
                 .findFirst();
@@ -140,7 +132,6 @@ public class StudentService {
 
         Course course = courseOpt.get();
         List<Lesson> lessons = course.getLessons();
-
         System.out.println("StudentService: Found " + lessons.size() + " lessons in course " + courseId);
         return lessons;
     }
@@ -150,7 +141,6 @@ public class StudentService {
      */
     public Lesson getLessonById(String courseId, String lessonId) throws IOException {
         List<Course> allCourses = db.loadCourses();
-
         Optional<Course> courseOpt = allCourses.stream()
                 .filter(c -> c.getCourseId().equals(courseId))
                 .findFirst();
@@ -175,12 +165,11 @@ public class StudentService {
     }
 
     /**
-     * Gets the progress of a specific student in a specific course. Returns a
-     * map where key is courseId and value is list of completed lesson IDs.
+     * Gets the progress of a specific student in a specific course.
+     * Returns a map where key is courseId and value is list of completed lesson IDs.
      */
     public Map<String, List<String>> getStudentProgress(String studentId, String courseId) throws IOException {
         List<User> allUsers = db.loadUsers();
-
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
@@ -203,6 +192,14 @@ public class StudentService {
         }
     }
 
+    // --- API Methods ---
+    /**
+     * Checks if a specific student has completed all lessons in a specific course.
+     * @param studentId The ID of the student.
+     * @param courseId The ID of the course.
+     * @return true if all lessons in the course are marked as completed by the student, false otherwise.
+     * @throws IOException if there's an error reading data.
+     */
     public boolean isCourseCompleted(String studentId, String courseId) throws IOException {
         // Get the course lessons
         List<Lesson> courseLessons = getCourseLessons(courseId);
@@ -238,5 +235,35 @@ public class StudentService {
         System.out.println(" - Completed lessons count (valid): " + completedLessonIdsSet.size());
 
         return isComplete;
+    }
+
+    /**
+     * Gets the completion status of a specific student in a specific course.
+     * @param studentId The ID of the student.
+     * @param courseId The ID of the course.
+     * @return "Complete" if all lessons are completed, "Incomplete" otherwise.
+     * @throws IOException if there's an error reading data.
+     */
+    public String getStudentCourseCompletionStatus(String studentId, String courseId) throws IOException {
+        return isCourseCompleted(studentId, courseId) ? "Complete" : "Incomplete";
+    }
+
+    /**
+     * Gets a list of course IDs that a specific student has completed.
+     * @param studentId The ID of the student.
+     * @return A list of course IDs.
+     * @throws IOException if there's an error reading data.
+     */
+    public List<String> getCompletedCourses(String studentId) throws IOException {
+        List<String> completedCourseIds = new ArrayList<>();
+        List<Course> allCourses = db.loadCourses();
+
+        for (Course course : allCourses) {
+            if (isCourseCompleted(studentId, course.getCourseId())) {
+                completedCourseIds.add(course.getCourseId());
+            }
+        }
+        System.out.println("StudentService: Found " + completedCourseIds.size() + " completed courses for student " + studentId);
+        return completedCourseIds;
     }
 }

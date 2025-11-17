@@ -93,7 +93,7 @@ public class StudentService {
     
         if (!s.getEnrolledCourses().contains(courseId)) {
              System.out.println("StudentService: Student " + studentId + " is not enrolled in course " + courseId);
-             return false; // Or handle differently based on requirements
+             return false; 
         }
 
         
@@ -180,36 +180,32 @@ public class StudentService {
 
         if (studentOpt.isEmpty()) {
             System.out.println("StudentService: Student with ID " + studentId + " not found.");
-            return null; // Or an empty map
+            return null; 
         }
 
         Student student = (Student) studentOpt.get();
         Map<String, List<String>> progress = student.getProgress();
 
-        // Return progress for the specific course only
         if (progress.containsKey(courseId)) {
             System.out.println("StudentService: Found progress for student " + studentId + " in course " + courseId);
-            return Map.of(courseId, progress.get(courseId)); // Return a map with only the requested course's progress
+            return Map.of(courseId, progress.get(courseId));
         } else {
             System.out.println("StudentService: No progress found for student " + studentId + " in course " + courseId);
-            return Map.of(courseId, new ArrayList<>()); // Return an empty list for the course
+            return Map.of(courseId, new ArrayList<>());
         }
     }
 
-    // --- API Methods ---
    
     public boolean isCourseCompleted(String studentId, String courseId) throws IOException {
         // Get the course lessons
         List<Lesson> courseLessons = getCourseLessons(courseId);
         if (courseLessons.isEmpty()) {
-            // If there are no lessons, technically it's "complete"
-            return true;
+
+            return false;
         }
 
-        // Get the student's progress for this specific course
         Map<String, List<String>> progress = getStudentProgress(studentId, courseId);
         if (progress == null || !progress.containsKey(courseId)) {
-            // If no progress recorded for this course, it's not complete
             return false;
         }
 
@@ -219,9 +215,8 @@ public class StudentService {
                 .map(Lesson::getLessonId)
                 .collect(java.util.stream.Collectors.toSet());
 
-        // Ensure completed list only contains valid lesson IDs from the course
         java.util.Set<String> completedLessonIdsSet = new java.util.HashSet<>(completedLessonIds);
-        completedLessonIdsSet.retainAll(courseLessonIdsSet); // Keep only IDs that exist in the course
+        completedLessonIdsSet.retainAll(courseLessonIdsSet); 
 
         boolean isComplete = courseLessonIdsSet.size() == completedLessonIdsSet.size();
 

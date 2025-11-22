@@ -102,11 +102,5 @@ public class Course {
         return this.lessons.removeIf(lesson -> lesson.getLessonId().equals(lessonId));
     }
     
-    public double getCourseAverageQuiz(String courseId) throws IOException {
-    List<QuizResult> results = dbManager.getQuizResultsForCourse(courseId);
-    if (results.isEmpty()) return 0;
-
-    return results.stream().mapToInt(QuizResult::getScore).average().orElse(0);
-}
 
 }

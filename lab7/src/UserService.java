@@ -458,5 +458,29 @@ public class UserService {
 
     return (completed * 100.0) / totalLessons;
 }
+      
+      public InstructorInsights getInstructorInsights(String instructorId) throws IOException {
+    Instructor instructor = getInstructorById(instructorId);
+    if (instructor == null) return null;
+
+    int totalCourses = instructor.getCreatedCourses().size();
+
+    List<Course> courses = dbManager.loadCourses().stream()
+            .filter(c -> instructor.getCreatedCourses().contains(c.getCourseId()))
+            .collect(Collectors.toList());
+
+    double avgQuiz = 0;
+    int totalStudents = 0;
+
+    for (Course c : courses) {
+        totalStudents += c.getStudents().size();
+        avgQuiz += getCourseAverageQuiz(c.getCourseId());
+    }
+
+    if (totalCourses > 0) avgQuiz /= totalCourses;
+
+    return new InstructorInsights(totalCourses, totalStudents, avgQuiz);
+}
+
 
 }

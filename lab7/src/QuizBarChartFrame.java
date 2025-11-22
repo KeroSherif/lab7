@@ -4,6 +4,9 @@
  */
 import javax.swing.*;
 import java.io.IOException;
+import org.jfree.chart.*;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 /**
  *
  * @author DANAH

@@ -3,29 +3,43 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 import javax.swing.*;
+import java.io.IOException;
 /**
  *
  * @author DANAH
  */
 public class ProgressChartFrame extends JFrame {
-    public ProgressChartFrame(String studentId, String courseId) throws IOException {
-        UserService userService = new UserService(new JsonDatabaseManager());
 
-        double progress = userService.getCourseProgress(studentId, courseId);
+    public ProgressChartFrame(String instructorId) {
+        setTitle("Progress Chart");
+        setSize(700, 500);
+        setLocationRelativeTo(null);
 
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        dataset.addValue(progress, "Progress", "Course");
+
+        JsonDatabaseManager db = JsonDatabaseManager.getInstance();
+        UserService userService = new UserService(db);
+
+        try {
+            for (Course course : db.loadCourses()) {
+                if (course.getInstructorId().equals(instructorId)) {
+                    double avgProgress = userService.getAverageProgressForCourse(course.getCourseId());
+                    dataset.addValue(avgProgress, "Progress", course.getTitle());
+                }
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error loading chart: " + ex.getMessage());
+        }
 
         JFreeChart chart = ChartFactory.createLineChart(
-                "Progress",
+                "Average Course Progress",
                 "Course",
-                "Progress %",
+                "Progress (%)",
                 dataset
         );
 
         add(new ChartPanel(chart));
-        setSize(600, 400);
-        setLocationRelativeTo(null);
     }
 }
+
 

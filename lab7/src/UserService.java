@@ -424,5 +424,9 @@ public class UserService {
     }
     Map<String, List<String>> progress
 
-            
+      public void saveQuizResult(String studentId, String courseId, String lessonId, int score) throws IOException {
+    QuizResult result = new QuizResult(studentId, courseId, lessonId, score);
+    dbManager.saveQuizResult(result);
+}
+      
 }

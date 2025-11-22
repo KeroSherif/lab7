@@ -35,11 +35,13 @@ public class InstructorDashboardFrame extends JFrame {
         JButton manageBtn = new JButton("Manage Courses");
         JButton viewStudentsBtn = new JButton("View Enrolled Students");
         JButton logoutBtn = new JButton("Logout");
+        JButton insightsBtn = new JButton("Insights");
 
         add(createBtn);
         add(manageBtn);
         add(viewStudentsBtn);
         add(logoutBtn);
+        add(insightsBtn);
 
         // Create Course
         createBtn.addActionListener(e -> {
@@ -61,6 +63,10 @@ public class InstructorDashboardFrame extends JFrame {
             dispose();
             new LoginFrame().setVisible(true);
         });
+        insightsBtn.addActionListener(e -> {
+    new InstructorInsightsFrame(currentUser.getUserId()).setVisible(true);
+});
+
     }
 
     // ==================== Create Course ====================
@@ -1010,12 +1016,4 @@ public class InstructorDashboardFrame extends JFrame {
         }
     }
    
-    JButton insightsBtn = new JButton("Insights");
-add(insightsBtn);
-insightsBtn.addActionListener(e -> {
-    new InstructorInsightsFrame(currentUser.getUserId()).setVisible(true);
-});
-
-
-
 }

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class JsonDatabaseManager {
 
@@ -13,6 +14,7 @@ public class JsonDatabaseManager {
     private static final String COURSES_FILE = "courses.json";
     private ObjectMapper mapper;
     private static JsonDatabaseManager instance = null;
+    private static final String QUIZ_RESULTS_FILE = "quiz_results.json";
 
     private JsonDatabaseManager() {
         // إنشاء ObjectMapper بشكل بسيط
@@ -24,6 +26,8 @@ public class JsonDatabaseManager {
         // تأكد من وجود الملفات
         initializeFile(USERS_FILE, new ArrayList<User>());
         initializeFile(COURSES_FILE, new ArrayList<Course>());
+        initializeFile(QUIZ_RESULTS_FILE, new ArrayList<QuizResult>());
+
     }
 
     public static JsonDatabaseManager getInstance() {
@@ -182,33 +186,42 @@ public class JsonDatabaseManager {
         Optional<Course> existingCourse = findCourseById(courseId);
         return existingCourse.isPresent();
     }
-    
-    public void saveQuizResult(QuizResult result) throws IOException {
-    List<QuizResult> results = loadQuizResults();
-    results.add(result);
-    saveQuizResults(results);
-}
 
 public List<QuizResult> loadQuizResults() throws IOException {
-    return loadList("quiz_results.json", QuizResult[].class);
+    File file = new File(QUIZ_RESULTS_FILE);
+
+    if (!file.exists() || file.length() == 0) {
+        return new ArrayList<>();
+    }
+
+    return mapper.readValue(file, new TypeReference<List<QuizResult>>() {});
 }
 
-public void saveQuizResults(List<QuizResult> list) throws IOException {
-    saveList("quiz_results.json", list);
+public void saveQuizResults(List<QuizResult> results) throws IOException {
+    mapper.writerWithDefaultPrettyPrinter().writeValue(new File(QUIZ_RESULTS_FILE), results);
+}
+
+public void saveQuizResult(QuizResult result) throws IOException {
+    List<QuizResult> list = loadQuizResults();
+    list.add(result);
+    saveQuizResults(list);
 }
 
 public List<QuizResult> getQuizResultsForLesson(String lessonId) throws IOException {
     return loadQuizResults()
             .stream()
             .filter(r -> r.getLessonId().equals(lessonId))
-            .collect(Collectors.toList());
+            .collect(java.util.stream.Collectors.toList());
 }
 
 public List<QuizResult> getQuizResultsForCourse(String courseId) throws IOException {
     return loadQuizResults()
             .stream()
             .filter(r -> r.getCourseId().equals(courseId))
-            .collect(Collectors.toList());
+            .collect(java.util.stream.Collectors.toList());
 }
+
+    
+   
 
 }

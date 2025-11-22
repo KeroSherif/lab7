@@ -442,5 +442,21 @@ public class UserService {
     }
 }
     
-      
+      public double getCourseProgress(String studentId, String courseId) throws IOException {
+    Student student = getStudentById(studentId);
+    Course course = dbManager.findCourseById(courseId).orElse(null);
+
+    if (student == null || course == null)
+        return 0;
+
+    int totalLessons = course.getLessons().size();
+    int completed = student.getProgress()
+            .getOrDefault(courseId, List.of())
+            .size();
+
+    if (totalLessons == 0) return 0;
+
+    return (completed * 100.0) / totalLessons;
+}
+
 }

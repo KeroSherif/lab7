@@ -3,39 +3,44 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 import javax.swing.*;
-import java.awt.*;
-
+import java.io.IOException;
 /**
  *
  * @author DANAH
  */
 public class QuizBarChartFrame extends JFrame {
-    public QuizBarChartFrame(String courseId) throws IOException {
-        JsonDatabaseManager db = new JsonDatabaseManager();
+
+    public QuizBarChartFrame(String instructorId) {
+        setTitle("Quiz Averages Chart");
+        setSize(700, 500);
+        setLocationRelativeTo(null);
 
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
-        List<Lesson> lessons = db.getLessonsByCourseId(courseId);
+        JsonDatabaseManager db = JsonDatabaseManager.getInstance();
 
-        for (Lesson l : lessons) {
-            double avg = db.getQuizResultsForLesson(l.getLessonId())
-                    .stream()
-                    .mapToInt(QuizResult::getScore)
-                    .average().orElse(0);
-
-            dataset.addValue(avg, "Average Score", l.getTitle());
+        try {
+            for (Course course : db.loadCourses()) {
+                if (course.getInstructorId().equals(instructorId)) {
+                    for (Lesson lesson : course.getLessons()) {
+                        double avg = db.getQuizResultsForLesson(lesson.getLessonId())
+                                .stream().mapToInt(QuizResult::getScore)
+                                .average().orElse(0);
+                        dataset.addValue(avg, "Score", lesson.getTitle());
+                    }
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error loading chart: " + e.getMessage());
         }
 
         JFreeChart chart = ChartFactory.createBarChart(
-                "Quiz Averages",
+                "Quiz Average per Lesson",
                 "Lesson",
-                "Score",
+                "Average Score",
                 dataset
         );
 
         add(new ChartPanel(chart));
-        setSize(800, 600);
-        setLocationRelativeTo(null);
     }
 }
-

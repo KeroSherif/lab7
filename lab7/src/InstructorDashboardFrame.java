@@ -1009,10 +1009,13 @@ public class InstructorDashboardFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+   
     JButton insightsBtn = new JButton("Insights");
+add(insightsBtn);
 insightsBtn.addActionListener(e -> {
-    new InsightsFrame(instructorId).setVisible(true);
+    new InstructorInsightsFrame(currentUser.getUserId()).setVisible(true);
 });
-sidebar.add(insightsBtn);
+
+
 
 }

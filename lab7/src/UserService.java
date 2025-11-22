@@ -422,7 +422,6 @@ public class UserService {
         
         return new java.util.ArrayList<>();
     }
-    Map<String, List<String>> progress
 
       public void saveQuizResult(String studentId, String courseId, String lessonId, int score) throws IOException {
     QuizResult result = new QuizResult(studentId, courseId, lessonId, score);
@@ -459,7 +458,39 @@ public class UserService {
     return (completed * 100.0) / totalLessons;
 }
       
-      public InstructorInsights getInstructorInsights(String instructorId) throws IOException {
+   public double getAverageProgressForCourse(String courseId) throws IOException {
+    List<Student> allStudents = getAllStudents();
+    double total = 0;
+    int count = 0;
+
+    for (Student s : allStudents) {
+        if (s.getEnrolledCourses().contains(courseId)) {
+            total += getCourseProgress(s.getUserId(), courseId);
+            count++;
+        }
+    }
+
+    return count == 0 ? 0 : total / count;
+}
+
+ public double getCourseAverageQuiz(String courseId) throws IOException {
+    List<QuizResult> results = dbManager.getQuizResultsForCourse(courseId);
+    if (results.isEmpty()) return 0;
+
+    return results.stream().mapToInt(QuizResult::getScore).average().orElse(0);
+}
+
+ public double getLessonAverageQuiz(String lessonId) throws IOException {
+    List<QuizResult> results = dbManager.getQuizResultsForLesson(lessonId);
+    if (results.isEmpty()) return 0;
+
+    return results.stream()
+            .mapToInt(QuizResult::getScore)
+            .average()
+            .orElse(0);
+}
+
+ public InstructorInsights getInstructorInsights(String instructorId) throws IOException {
     Instructor instructor = getInstructorById(instructorId);
     if (instructor == null) return null;
 
@@ -481,6 +512,5 @@ public class UserService {
 
     return new InstructorInsights(totalCourses, totalStudents, avgQuiz);
 }
-
 
 }

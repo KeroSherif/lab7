@@ -75,14 +75,5 @@ public class Lesson {
         this.resources.remove(resource);
     }
     
-    public double getLessonAverageQuiz(String lessonId) throws IOException {
-    List<QuizResult> results = dbManager.getQuizResultsForLesson(lessonId);
-    if (results.isEmpty()) return 0;
-
-    return results.stream()
-            .mapToInt(QuizResult::getScore)
-            .average()
-            .orElse(0);
-}
 
 }

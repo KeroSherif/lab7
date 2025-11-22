@@ -429,4 +429,18 @@ public class UserService {
     dbManager.saveQuizResult(result);
 }
       
+  public void markLessonCompleted(String studentId, String courseId, String lessonId) throws IOException {
+    Student student = getStudentById(studentId);
+    if (student == null) return;
+
+    student.getProgress().putIfAbsent(courseId, new java.util.ArrayList<>());
+    List<String> completed = student.getProgress().get(courseId);
+
+    if (!completed.contains(lessonId)) {
+        completed.add(lessonId);
+        dbManager.saveUsers(dbManager.loadUsers());
+    }
+}
+    
+      
 }

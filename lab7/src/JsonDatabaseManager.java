@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,20 +12,24 @@ public class JsonDatabaseManager {
 
     private static final String USERS_FILE = "users.json";
     private static final String COURSES_FILE = "courses.json";
+    private static final String ADMINS_FILE = "admin.json";
+
     private ObjectMapper mapper;
     private static JsonDatabaseManager instance = null;
 
     private JsonDatabaseManager() {
-        // إنشاء ObjectMapper بشكل بسيط
-        this.mapper = new ObjectMapper();
-        
-        // تفعيل الـ pretty printing
-        this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
-        
-        // تأكد من وجود الملفات
-        initializeFile(USERS_FILE, new ArrayList<User>());
-        initializeFile(COURSES_FILE, new ArrayList<Course>());
-    }
+    this.mapper = new ObjectMapper();
+    this.mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    this.mapper.registerSubtypes(
+        new NamedType(Student.class, "student"),
+        new NamedType(Instructor.class, "instructor"),
+        new NamedType(Admin.class, "Admin")
+    );
+
+    initializeFile(USERS_FILE, new ArrayList<User>());
+    initializeFile(COURSES_FILE, new ArrayList<Course>());
+    initializeAdminFile();
+}
 
     public static JsonDatabaseManager getInstance() {
         if (instance == null) {
@@ -47,49 +52,70 @@ public class JsonDatabaseManager {
         }
     }
 
-    // Load Methods
-   public List<User> loadUsers() throws IOException {
-    File file = new File(USERS_FILE);
-    
-    // لو الملف مش موجود أو فاضي
-    if (!file.exists() || file.length() == 0) {
-        return new ArrayList<>();
-    }
-    
-    try {
-        List<User> users = mapper.readValue(file, new TypeReference<List<User>>() {});
-        
-        // تحقق إن كل user عنده role
-        for (User user : users) {
-            if (user.getRole() == null || user.getRole().isEmpty()) {
-                System.err.println("WARNING: User " + user.getUserId() + " has no role. Fixing...");
-                // حاول تحدد الـ role من نوع الكلاس
-                if (user instanceof Student) {
-                    user.setRole("student");
-                } else if (user instanceof Instructor) {
-                    user.setRole("instructor");
-                }
-            }
+    private void initializeAdminFile() {
+    File adminFile = new File(ADMINS_FILE);
+    if (!adminFile.exists()) {
+        try {
+            mapper.writerWithDefaultPrettyPrinter()
+                  .writeValue(adminFile, new ArrayList<Admin>());
+            System.out.println("Created empty admin.json");
+        } catch (IOException e) {
+            System.err.println("Failed to create admin.json: " + e.getMessage());
+            e.printStackTrace();
         }
-        
-        return users;
-        
-    } catch (Exception e) {
-        System.err.println("ERROR reading users.json: " + e.getMessage());
-        System.err.println("Please delete users.json and restart the application.");
-        throw e; // ارمي الـ error بدل ما تمسح الملف
     }
 }
 
-    public List<Course> loadCourses() throws IOException {
-        File file = new File(COURSES_FILE);
-        if (file.length() == 0) {
+    // --------------------------------------------------------------------
+    //                          LOAD METHODS
+    // --------------------------------------------------------------------
+    public List<User> loadUsers() throws IOException {
+        File file = new File(USERS_FILE);
+        if (!file.exists() || file.length() == 0) {
             return new ArrayList<>();
         }
-        return mapper.readValue(file, new TypeReference<List<Course>>() {});
+        try {
+            List<User> users = mapper.readValue(file, new TypeReference<List<User>>() {});
+            for (User user : users) {
+                if (user.getRole() == null || user.getRole().isEmpty()) {
+                    System.err.println("WARNING: Missing role for userId = " + user.getUserId());
+                    if (user instanceof Student) user.setRole("student");
+                    else if (user instanceof Instructor) user.setRole("instructor");
+                    else if (user instanceof Admin) user.setRole("Admin");
+                }
+            }
+            return users;
+        } catch (Exception e) {
+            System.err.println("ERROR reading users.json: " + e.getMessage());
+            throw e;
+        }
     }
 
-    // Save Methods
+    public List<Course> loadCourses() throws IOException {
+        File file = new File(COURSES_FILE);
+        if (!file.exists() || file.length() == 0) {
+            return new ArrayList<>();
+        }
+        List<Course> courses = mapper.readValue(file, new TypeReference<List<Course>>() {});
+        for (Course c : courses) {
+            if (c.getApprovalStatus() == null) {
+                c.setApprovalStatus(Course.ApprovalStatus.PENDING);
+            }
+        }
+        return courses;
+    }
+
+    public List<Admin> loadAdmins() throws IOException {
+        File file = new File(ADMINS_FILE);
+        if (!file.exists() || file.length() == 0) {
+            return new ArrayList<>();
+        }
+        return mapper.readValue(file, new TypeReference<List<Admin>>() {});
+    }
+
+    // --------------------------------------------------------------------
+    //                          SAVE METHODS
+    // --------------------------------------------------------------------
     public void saveUsers(List<User> users) throws IOException {
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File(USERS_FILE), users);
     }
@@ -98,7 +124,13 @@ public class JsonDatabaseManager {
         mapper.writerWithDefaultPrettyPrinter().writeValue(new File(COURSES_FILE), courses);
     }
 
-    // Save Single Object Methods
+    public void saveAdmins(List<Admin> admins) throws IOException {
+        mapper.writerWithDefaultPrettyPrinter().writeValue(new File(ADMINS_FILE), admins);
+    }
+
+    // --------------------------------------------------------------------
+    //                    SAVE SINGLE OBJECT (USER / COURSE)
+    // --------------------------------------------------------------------
     public void saveUser(User user) throws IOException {
         List<User> users = loadUsers();
         users.add(user);
@@ -111,7 +143,9 @@ public class JsonDatabaseManager {
         saveCourses(courses);
     }
 
-    // Helper Methods
+    // --------------------------------------------------------------------
+    //                          FIND METHODS
+    // --------------------------------------------------------------------
     public Optional<User> findUserById(String userId) throws IOException {
         List<User> users = loadUsers();
         return users.stream().filter(u -> u.getUserId().equals(userId)).findFirst();
@@ -145,12 +179,15 @@ public class JsonDatabaseManager {
 
     public User getUserByEmail(String email) throws IOException {
         List<User> users = loadUsers();
-        Optional<User> userOpt = users.stream()
-                .filter(u -> u.getEmail().equals(email))
-                .findFirst();
-        return userOpt.orElse(null);
+        return users.stream()
+                .filter(u -> u.getEmail().equalsIgnoreCase(email))
+                .findFirst()
+                .orElse(null);
     }
 
+    // --------------------------------------------------------------------
+    //                       AUTO-INCREMENT USER ID
+    // --------------------------------------------------------------------
     public String getNextUserId() throws IOException {
         List<User> users = loadUsers();
         if (users.isEmpty()) {
@@ -173,14 +210,15 @@ public class JsonDatabaseManager {
         return "U" + (maxId + 1);
     }
 
+    // --------------------------------------------------------------------
+    //                  DUPLICATE CHECK HELPERS
+    // --------------------------------------------------------------------
     public boolean isUserIdDuplicate(String userId) throws IOException {
-        Optional<User> existingUser = findUserById(userId);
-        return existingUser.isPresent();
+        return findUserById(userId).isPresent();
     }
 
     public boolean isCourseIdDuplicate(String courseId) throws IOException {
-        Optional<Course> existingCourse = findCourseById(courseId);
-        return existingCourse.isPresent();
+        return findCourseById(courseId).isPresent();
     }
     public static void saveCertificate(Map<String, String> certificate) {
     try {

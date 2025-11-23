@@ -546,31 +546,44 @@ public class StudentDashboardFrame extends JFrame {
         }
     }
 
-    // Constructor with no arguments (for compatibility)
+
     public StudentDashboardFrame() {
         this(new Student());
     }
+
+ 
 
     private void showMyProfile() {
         UserService userService = new UserService(dbManager);
         try {
             int[] stats = userService.getStudentStatistics(currentUser.getUserId());
+            List<Course> enrolledCourses = studentService.getEnrolledCourses(currentUser.getUserId());
+            int totalLessons = 0;
+            for (Course c : enrolledCourses) {
+                totalLessons += c.getLessons().size();
+            }
+            double completionRate = (totalLessons > 0) ? (stats[1] * 100.0 / totalLessons) : 0.0;
+
             String message = String.format(
-                    "=== My Profile ===\n"
-                    + "User ID: %s\n"
-                    + "Username: %s\n"
-                    + "Email: %s\n"
-                    + "Role: %s\n"
-                    + "=== My Statistics ===\n"
-                    + "Enrolled Courses: %d\n"
-                    + "Completed Lessons: %d\n",
-                    currentUser.getUserId(),
-                    currentUser.getUsername(),
-                    currentUser.getEmail(),
-                    currentUser.getRole(),
-                    stats[0],
-                    stats[1]
+                "=== My Profile ===\n" +
+                "User ID: %s\n" +
+                "Username: %s\n" +
+                "Email: %s\n" +
+                "Role: %s\n\n" +
+                "=== My Statistics ===\n" +
+                "Enrolled Courses: %d\n" +
+                "Completed Lessons: %d / %d\n" +
+                "Completion Rate: %.1f%%",
+                currentUser.getUserId(),
+                currentUser.getUsername(),
+                currentUser.getEmail(),
+                currentUser.getRole(),
+                stats[0],
+                stats[1],
+                totalLessons,
+                completionRate
             );
+
             String[] options = {"Edit Profile", "Change Password", "Close"};
             int choice = JOptionPane.showOptionDialog(this,
                     message,
@@ -580,19 +593,17 @@ public class StudentDashboardFrame extends JFrame {
                     null,
                     options,
                     options[2]);
-            if (choice == 0) { // Edit Profile
+
+            if (choice == 0) {
                 showEditProfileDialog();
-            } else if (choice == 1) { // Change Password
+            } else if (choice == 1) {
                 showChangePasswordDialog();
             }
+
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error loading profile: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading profile: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
-
     private void showEditProfileDialog() {
         UserService userService = new UserService(dbManager);
         String newUsername = JOptionPane.showInputDialog(this,

@@ -20,12 +20,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public abstract class User {
     protected String userId;
-    protected String role; // <-- String
+    protected String role; 
     protected String username;
     protected String email;
     protected String passwordHash;
 
-    // Constructor فاضي لـ Jackson
+    
    public User() {
     this.userId = null;
     this.role = null; 
@@ -36,13 +36,13 @@ public abstract class User {
 
     public User(String userId, String role, String username, String email, String passwordHash) {
         this.userId = userId;
-        this.role = role; // <-- بياخد القيمة من المُنشئ
+        this.role = role; 
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
     }
 
-    // Getters and Setters
+    
     public String getUserId() {
         return userId;
     }
@@ -51,13 +51,13 @@ public abstract class User {
         this.userId = userId;
     }
 
-    public String getRole() { // <-- Getter مش مظبوط؟
-        return role; // <-- بيرجع الحقل دا
+    public String getRole() { 
+        return role; 
     }
 
     public void setRole(String role) {
         if (role == null) {
-            this.role = ""; // <-- مهم، مش null
+            this.role = ""; 
         } else {
             this.role = role;
         }

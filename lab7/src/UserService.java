@@ -6,9 +6,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Service class for managing users (Students and Instructors) Provides methods
- * for user CRUD operations
- *
  * @author Kirolos Sherif
  */
 public class UserService {
@@ -81,7 +78,7 @@ public class UserService {
             return false;
         }
 
-        // Check email uniqueness (excluding current user)
+        
         boolean emailExists = allUsers.stream()
                 .anyMatch(u -> !u.getUserId().equals(userId) && newEmail.equals(u.getEmail()));
 
@@ -159,10 +156,10 @@ public class UserService {
             Instructor instructor = (Instructor) user;
             List<String> createdCourses = new ArrayList<>(instructor.getCreatedCourses());
 
-            // Remove courses
+            
             allCourses.removeIf(c -> createdCourses.contains(c.getCourseId()));
 
-            // Remove these courses from students' progress & enrollment
+            
             List<User> allUsers = dbManager.loadUsers();
             for (User u : allUsers) {
                 if (u instanceof Student) {
@@ -174,7 +171,7 @@ public class UserService {
             dbManager.saveUsers(allUsers);
         }
 
-        // Remove user and save
+        
         List<User> allUsers = dbManager.loadUsers();
         allUsers.removeIf(u -> u.getUserId().equals(userId));
         dbManager.saveUsers(allUsers);
@@ -314,7 +311,7 @@ public class UserService {
     // ==================== Get Users by Role ====================
     public List<User> getUsersByRole(String role) throws IOException {
         if ("student".equalsIgnoreCase(role)) {
-            return new ArrayList<>(getAllStudents()); // تحويل لـ List<User>
+            return new ArrayList<>(getAllStudents());
         } else if ("instructor".equalsIgnoreCase(role)) {
             return new ArrayList<>(getAllInstructors());
         }

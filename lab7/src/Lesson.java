@@ -16,24 +16,24 @@ public class Lesson {
     private String lessonId;
     private String title;
     private String content;
-    private List<String> resources; // ممكن تكون فاضية (List of URLs or file paths)
+    private List<String> resources; 
     private List<Question> questions;
 
-    // Constructor فاضي لـ Jackson
+   
     public Lesson() {
         this.resources = new ArrayList<>();
         this.questions = new ArrayList<>();
     }
 
-    // Constructor مع باراميترز
+   
     public Lesson(String lessonId, String title, String content) {
         this.lessonId = lessonId;
         this.title = title;
         this.content = content;
-        this.resources = new ArrayList<>(); // تبدأ فاضية
+        this.resources = new ArrayList<>(); 
     }
 
-    // Getters و Setters
+    
     public List<Question> getQuestions() {
         return questions;
     }
@@ -77,7 +77,7 @@ public class Lesson {
         this.resources = resources;
     }
 
-    // Business Methods
+  
     public void addResource(String resource) {
         if (!this.resources.contains(resource)) {
             this.resources.add(resource);

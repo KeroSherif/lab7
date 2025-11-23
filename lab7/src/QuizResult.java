@@ -4,7 +4,6 @@ public class QuizResult {
     private String lessonId;
     private int score;
 
-    // Empty constructor for Jackson
     public QuizResult() {
     }
 
@@ -15,7 +14,7 @@ public class QuizResult {
         this.score = score;
     }
 
-    // Getters and Setters
+    
     public String getStudentId() { return studentId; }
     public void setStudentId(String studentId) { this.studentId = studentId; }
     

@@ -23,7 +23,7 @@ public class AdminService {
     public List<User> getAllUsers() throws IOException {
         List<User> allUsers = dbManager.loadUsers();
         return allUsers.stream()
-                .filter(u -> !(u instanceof Admin)) // استثناء الـ Admins
+                .filter(u -> !(u instanceof Admin)) 
                 .toList();
     }
 

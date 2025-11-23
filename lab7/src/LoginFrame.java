@@ -119,16 +119,16 @@ public class LoginFrame extends JFrame {
 
    private void showAdminSetupDialog() {
     JDialog dialog = new JDialog(this, "Create Admin Account", true);
-    dialog.setSize(400, 300); // قلل الارتفاع قليلًا لأننا نستخدم GridBagLayout
+    dialog.setSize(400, 300); 
     dialog.setLocationRelativeTo(this);
 
-    // استخدم GridBagLayout للتحكم الدقيق في الترتيب
+    
     dialog.setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(5, 5, 5, 5); // هامش بين العناصر
-    gbc.fill = GridBagConstraints.HORIZONTAL; // املأ المساحة أفقيًا
+    gbc.insets = new Insets(5, 5, 5, 5);
+    gbc.fill = GridBagConstraints.HORIZONTAL; 
 
-    // Username
+   
     JLabel userLabel = new JLabel("Username:");
     JTextField userField = new JTextField(20);
     gbc.gridx = 0; gbc.gridy = 0;
@@ -138,7 +138,7 @@ public class LoginFrame extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(userField, gbc);
 
-    // Email
+    
     JLabel emailLabel = new JLabel("Email:");
     JTextField emailField = new JTextField(20);
     gbc.gridx = 0; gbc.gridy = 1;
@@ -148,7 +148,7 @@ public class LoginFrame extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(emailField, gbc);
 
-    // Password
+   
     JLabel passLabel = new JLabel("Password:");
     JPasswordField passField = new JPasswordField(20);
     gbc.gridx = 0; gbc.gridy = 2;
@@ -158,7 +158,7 @@ public class LoginFrame extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(passField, gbc);
 
-    // Confirm Password
+    
     JLabel confirmLabel = new JLabel("Confirm Password:");
     JPasswordField confirmField = new JPasswordField(20);
     gbc.gridx = 0; gbc.gridy = 3;
@@ -168,21 +168,21 @@ public class LoginFrame extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(confirmField, gbc);
 
-    // زر Create Admin
+    
     JButton createBtn = new JButton("Create Admin");
     gbc.gridx = 0; gbc.gridy = 4;
     gbc.gridwidth = 2; // يغطي عمودين
     gbc.anchor = GridBagConstraints.CENTER;
     dialog.add(createBtn, gbc);
 
-    // زر Cancel
+   
     JButton cancelBtn = new JButton("Cancel");
     gbc.gridx = 0; gbc.gridy = 5;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
     dialog.add(cancelBtn, gbc);
 
-    // إجراءات الأزرار
+    
     createBtn.addActionListener(e -> {
         String user = userField.getText().trim();
         String email = emailField.getText().trim();

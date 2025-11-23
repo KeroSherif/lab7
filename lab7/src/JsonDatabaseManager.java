@@ -18,7 +18,7 @@ public class JsonDatabaseManager {
     private static final String COURSES_FILE = "courses.json";
     private static final String ADMINS_FILE = "admin.json";
     private static final String CERTIFICATES_FILE = "certificates.json";
-    private static final String QUIZ_RESULTS_FILE = "quiz_results.json"; // ✅ جديد
+    private static final String QUIZ_RESULTS_FILE = "quiz_results.json"; 
 
     private ObjectMapper mapper;
     private static JsonDatabaseManager instance = null;
@@ -35,7 +35,7 @@ public class JsonDatabaseManager {
         initializeFile(USERS_FILE, new ArrayList<User>());
         initializeFile(COURSES_FILE, new ArrayList<Course>());
         initializeAdminFile();
-        initializeFile(QUIZ_RESULTS_FILE, new ArrayList<QuizResult>()); // ✅ تهيئة ملف الكويزات
+        initializeFile(QUIZ_RESULTS_FILE, new ArrayList<QuizResult>()); 
     }
 
     public static JsonDatabaseManager getInstance() {
@@ -164,7 +164,7 @@ public class JsonDatabaseManager {
     }
 
     // --------------------------------------------------------------------
-    //                    SAVE SINGLE OBJECT (USER / COURSE) — FIXED TO AVOID DUPLICATES
+    //                    SAVE SINGLE OBJECT 
     // --------------------------------------------------------------------
     public void saveUser(User user) throws IOException {
         List<User> users = loadUsers();

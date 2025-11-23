@@ -45,7 +45,7 @@ public class QuizTakerDialog extends JDialog {
         JButton submitBtn = new JButton("Submit Quiz");
         submitBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         submitBtn.addActionListener(e -> {
-            // Check if all questions are answered
+            
             boolean allAnswered = true;
             for (ButtonGroup bg : buttonGroups) {
                 if (bg.getSelection() == null) {
@@ -62,7 +62,7 @@ public class QuizTakerDialog extends JDialog {
                 return;
             }
 
-            // Calculate score
+           
             int correctCount = 0;
             for (int i = 0; i < questions.size(); i++) {
                 ButtonGroup bg = buttonGroups.get(i);
@@ -72,7 +72,7 @@ public class QuizTakerDialog extends JDialog {
                 }
             }
 
-            // Calculate percentage
+           
             score = (int) Math.round(((double) correctCount / questions.size()) * 100);
             String message = "You got " + correctCount + "/" + questions.size() + " (" + score + "%)";
 

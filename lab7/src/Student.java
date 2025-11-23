@@ -5,26 +5,25 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  *
  * @author Kirolos sherif
  */
-@JsonTypeName("student") // <-- مهم
+@JsonTypeName("student") 
 public class Student extends User {
     private List<String> enrolledCourses;
     private Map<String, List<String>> progress;
-    // progress: key = courseId, value = list of completed lessonIds
-    private List<String> notifications; // <-- New field for notifications
+    private List<String> notifications; 
 
-    // Constructor فاضي لـ Jackson
+    
     public Student() {
-        super(); // لازم تستخدم constructor الـ parent فاضي لـ Jackson
+        super(); 
         this.enrolledCourses = new ArrayList<>();
-        this.progress = new HashMap<>(); // <-- مهم، مش null
-        this.notifications = new ArrayList<>(); // Initialize notifications list
+        this.progress = new HashMap<>(); 
+        this.notifications = new ArrayList<>(); 
     }
 
     public Student(String userId, String username, String email, String passwordHash) {
         super(userId, "student", username, email, passwordHash);
         this.enrolledCourses = new ArrayList<>();
         this.progress = new HashMap<>();
-        this.notifications = new ArrayList<>(); // Initialize notifications list
+        this.notifications = new ArrayList<>();
     }
 
     public List<String> getEnrolledCourses() {
@@ -41,13 +40,13 @@ public class Student extends User {
 
     public void setProgress(Map<String, List<String>> progress) {
         if (progress == null) {
-            this.progress = new HashMap<>(); // <-- مهم، مش null
+            this.progress = new HashMap<>(); 
         } else {
             this.progress = progress;
         }
     }
 
-    // Getter and Setter for notifications
+    
     public List<String> getNotifications() {
         return notifications;
     }
@@ -60,7 +59,7 @@ public class Student extends User {
         }
     }
 
-    // Method to add a notification
+    
     public void addNotification(String notification) {
         if (notification != null && !notification.trim().isEmpty()) {
             this.notifications.add(notification);

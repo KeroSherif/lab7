@@ -16,7 +16,7 @@ public class InstructorInsightsFrame extends JFrame {
         JsonDatabaseManager db = JsonDatabaseManager.getInstance();
         
         try {
-            // Get instructor's courses
+            
             List<Course> allCourses = db.loadCourses();
             List<Course> instructorCourses = allCourses.stream()
                 .filter(c -> c.getInstructorId().equals(instructorId))
@@ -32,7 +32,7 @@ public class InstructorInsightsFrame extends JFrame {
                 return;
             }
             
-            // Calculate statistics
+          
             int totalCourses = instructorCourses.size();
             int totalStudents = 0;
             int totalLessons = 0;
@@ -60,7 +60,7 @@ public class InstructorInsightsFrame extends JFrame {
                 }
                 totalQuizzes += courseQuizzes;
                 
-                // Calculate completion rate for this course
+              
                 int totalPossibleCompletions = courseStudents * courseLessons;
                 int actualCompletions = 0;
                 
@@ -81,7 +81,7 @@ public class InstructorInsightsFrame extends JFrame {
                 double completionRate = totalPossibleCompletions > 0 
                     ? (actualCompletions * 100.0 / totalPossibleCompletions) : 0;
                 
-                // Get average quiz score for this course
+                
                 List<QuizResult> courseQuizResults = allQuizResults.stream()
                     .filter(qr -> qr.getCourseId().equals(course.getCourseId()))
                     .toList();
@@ -97,17 +97,17 @@ public class InstructorInsightsFrame extends JFrame {
                     quizCount += courseQuizResults.size();
                 }
                 
-                // Add to details
+                
                 courseDetails.append(String.format(
                     "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
-                    "📚 Course: %s\n" +
+                    "   Course: %s\n" +
                     "   ID: %s\n" +
                     "   Status: %s\n" +
-                    "   👥 Students: %d\n" +
-                    "   📖 Lessons: %d\n" +
-                    "   ❓ Quizzes: %d\n" +
-                    "   📊 Completion Rate: %.1f%%\n" +
-                    "   🎯 Avg Quiz Score: %s\n\n",
+                    "    Students: %d\n" +
+                    "    Lessons: %d\n" +
+                    "    Quizzes: %d\n" +
+                    "    Completion Rate: %.1f%%\n" +
+                    "     Avg Quiz Score: %s\n\n",
                     course.getTitle(),
                     course.getCourseId(),
                     getStatusText(course.getApprovalStatus()),
@@ -131,7 +131,7 @@ public class InstructorInsightsFrame extends JFrame {
                 "═══════════════════════════════════════════\n" +
                 "       INSTRUCTOR INSIGHTS DASHBOARD\n" +
                 "═══════════════════════════════════════════\n\n" +
-                "📊 OVERALL STATISTICS\n" +
+                "  OVERALL STATISTICS\n" +
                 "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
                 "   Total Courses Created: %d\n" +
                 "   Total Students Enrolled: %d\n" +
@@ -139,7 +139,7 @@ public class InstructorInsightsFrame extends JFrame {
                 "   Total Quizzes: %d\n" +
                 "   Overall Avg Quiz Score: %s\n" +
                 "   Avg Students per Course: %.1f\n\n" +
-                "📚 COURSE DETAILS\n",
+                "   COURSE DETAILS\n",
                 totalCourses,
                 totalStudents,
                 totalLessons,
@@ -153,7 +153,7 @@ public class InstructorInsightsFrame extends JFrame {
             JScrollPane scrollPane = new JScrollPane(textArea);
             add(scrollPane, BorderLayout.CENTER);
             
-            // Add buttons panel
+           
             JPanel buttonPanel = new JPanel();
             JButton refreshButton = new JButton("Refresh");
             JButton closeButton = new JButton("Close");
@@ -180,9 +180,9 @@ public class InstructorInsightsFrame extends JFrame {
     private String getStatusText(Course.ApprovalStatus status) {
         if (status == null) return "PENDING";
         switch (status) {
-            case APPROVED: return "✓ APPROVED";
-            case REJECTED: return "✗ REJECTED";
-            case PENDING: return "⏳ PENDING";
+            case APPROVED: return " APPROVED";
+            case REJECTED: return " REJECTED";
+            case PENDING: return " PENDING";
             default: return "UNKNOWN";
         }
     }

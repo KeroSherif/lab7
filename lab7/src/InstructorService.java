@@ -21,10 +21,7 @@ public class InstructorService {
         this.dbManager = dbManager;
     }
 
-    /**
-     * Creates a new course and associates it with the instructor.
-     * Checks for instructor existence and course ID uniqueness.
-     */
+    
     public Course createCourse(String instructorId, String courseId, String title, String description, String instructorIdForCourse) throws IOException {
         List<User> allUsers = dbManager.loadUsers();
         List<Course> allCourses = dbManager.loadCourses();
@@ -55,10 +52,7 @@ public class InstructorService {
         return newCourse;
     }
 
-    /**
-     * Updates an existing course if the instructor is the owner.
-     * Checks for course existence and instructor ownership.
-     */
+   
     public boolean updateCourse(String instructorId, String courseId, String newTitle, String newDescription) throws IOException {
         List<User> allUsers = dbManager.loadUsers();
         List<Course> allCourses = dbManager.loadCourses();
@@ -98,11 +92,7 @@ public class InstructorService {
         return true;
     }
 
-    /**
-     * Deletes a course if the instructor is the owner.
-     * Checks for course existence and instructor ownership.
-     * Also removes the course ID from the instructor's list and unenrolls students.
-     */
+    
     public boolean deleteCourse(String instructorId, String courseId) throws IOException {
         List<User> allUsers = dbManager.loadUsers();
         List<Course> allCourses = dbManager.loadCourses();
@@ -155,10 +145,7 @@ public class InstructorService {
         return true;
     }
 
-    /**
-     * Adds a lesson to a course if the instructor is the owner.
-     * Checks for course existence and instructor ownership.
-     */
+    
     public boolean addLessonToCourse(String instructorId, String courseId, Lesson lesson) throws IOException {
         List<Course> allCourses = dbManager.loadCourses();
 
@@ -185,10 +172,7 @@ public class InstructorService {
         return true;
     }
 
-    /**
-     * Updates a lesson within a course if the instructor is the owner.
-     * Checks for course existence, instructor ownership, and lesson existence.
-     */
+    
     public boolean updateLesson(String instructorId, String courseId, String lessonId, String newTitle, String newContent) throws IOException {
         List<Course> allCourses = dbManager.loadCourses();
 
@@ -226,10 +210,7 @@ public class InstructorService {
         return true;
     }
 
-    /**
-     * Removes a lesson from a course if the instructor is the owner.
-     * Checks for course existence, instructor ownership, and lesson existence.
-     */
+
     public boolean removeLessonFromCourse(String instructorId, String courseId, String lessonId) throws IOException {
         List<Course> allCourses = dbManager.loadCourses();
 
@@ -260,10 +241,7 @@ public class InstructorService {
         return true;
     }
 
-    /**
-     * Gets a list of students enrolled in a specific course, if the instructor is the owner.
-     * Checks for course existence and instructor ownership.
-     */
+    
     public List<Student> getEnrolledStudents(String instructorId, String courseId) throws IOException {
         List<User> allUsers = dbManager.loadUsers();
         List<Course> allCourses = dbManager.loadCourses();
@@ -294,15 +272,7 @@ public class InstructorService {
         return enrolledStudents;
     }
 
-    // --- API Methods ---
-    /**
-     * Generates a report of completion status for all students in a specific course,
-     * if the instructor is the owner of the course.
-     * @param instructorId The ID of the instructor requesting the report.
-     * @param courseId The ID of the course.
-     * @return A list of CourseStudentProgressReport objects containing student info and status.
-     * @throws IOException if there's an error reading data.
-     */
+    
     public List<CourseStudentProgressReport> getCourseCompletionReport(String instructorId, String courseId) throws IOException {
         List<User> allUsers = dbManager.loadUsers();
         List<Course> allCourses = dbManager.loadCourses();
@@ -355,9 +325,7 @@ public class InstructorService {
         return report;
     }
 
-    /**
-     * Helper class to hold completion report data for a single student in a course.
-     */
+   
     class CourseStudentProgressReport {
         private String studentId;
         private String studentUsername;

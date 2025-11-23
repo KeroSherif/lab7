@@ -17,15 +17,15 @@ public class Course {
     private String description;
     private String instructorId;
     private List<Lesson> lessons;
-    private List<String> students; // قائمة بـ userIds للطلاب اللي اشتركوا
+    private List<String> students; 
 
-    // Constructor فاضي لـ Jackson
+
     public Course() {
         this.lessons = new ArrayList<>();
         this.students = new ArrayList<>();
     }
 
-    // Constructor مع باراميترز
+   
     public Course(String courseId, String title, String description, String instructorId) {
         this.courseId = courseId;
         this.title = title;
@@ -51,7 +51,7 @@ public class Course {
         this.approvalStatus = approvalStatus;
     }
 
-    // Getters و Setters
+    
     public String getCourseId() {
         return courseId;
     }
@@ -100,7 +100,7 @@ public class Course {
         this.students = students;
     }
 
-    // Business Methods
+    
     public void addStudent(String studentId) {
         if (!this.students.contains(studentId)) {
             this.students.add(studentId);

@@ -33,7 +33,7 @@ public class InsightsFrame extends JFrame {
             area.setText(
                 "Total Courses: " + data[0] + "\n" +
                 "Total Students: " + data[1] + "\n" +
-                "Average Quiz Score: " + data[2] + "%"  // لو بييجي كنسبة
+                "Average Quiz Score: " + data[2] + "%" 
             );
         } else {
             area.setText("No statistics available for this instructor.");

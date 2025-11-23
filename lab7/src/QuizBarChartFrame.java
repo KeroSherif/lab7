@@ -37,12 +37,12 @@ public class QuizBarChartFrame extends JFrame {
             
             for (Course course : instructorCourses) {
                 for (Lesson lesson : course.getLessons()) {
-                    // Check if lesson has quiz
+                    
                     if (lesson.getQuestions() == null || lesson.getQuestions().isEmpty()) {
                         continue;
                     }
                     
-                    // Get quiz results for this lesson
+                    
                     List<QuizResult> lessonResults = allQuizResults.stream()
                         .filter(qr -> qr.getLessonId().equals(lesson.getLessonId()))
                         .toList();
@@ -85,7 +85,7 @@ public class QuizBarChartFrame extends JFrame {
                 false
             );
             
-            // Customize chart
+            
             chart.getCategoryPlot().getRangeAxis().setRange(0, 100);
             
             ChartPanel chartPanel = new ChartPanel(chart);

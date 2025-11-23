@@ -55,10 +55,10 @@ public class InstructorDashboardFrame extends JFrame {
 
         chartsBtn.addActionListener(e -> {
             String[] options = {
-                "📊 Course Completion Progress",
-                "🎯 Quiz Performance",
-                "👥 Student Enrollment",
-                "📈 View All Charts"
+                " Course Completion Progress",
+                " Quiz Performance",
+                " Student Enrollment",
+                " View All Charts"
             };
 
             int choice = JOptionPane.showOptionDialog(
@@ -263,7 +263,6 @@ public class InstructorDashboardFrame extends JFrame {
     }
 
     // ==================== Manage Courses ====================
-    // In InstructorDashboardFrame.java
 
 private void showManageCoursesDialog() {
     try {
@@ -285,7 +284,7 @@ private void showManageCoursesDialog() {
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
 
-        // 1. ADD "Status" TO COLUMNS
+        
         String[] columns = {"Course ID", "Title", "Status", "Description", "Students", "Lessons"};
         
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
@@ -296,7 +295,7 @@ private void showManageCoursesDialog() {
         };
 
         for (Course course : instructorCourses) {
-            // 2. DETERMINE STATUS TEXT
+           
             String statusText;
             if (course.getApprovalStatus() == Course.ApprovalStatus.APPROVED) {
                 statusText = "Admin Approved";
@@ -309,7 +308,7 @@ private void showManageCoursesDialog() {
             model.addRow(new Object[]{
                 course.getCourseId(),
                 course.getTitle(),
-                statusText, // Add the status text here
+                statusText, 
                 course.getDescription(),
                 course.getStudents().size(),
                 course.getLessons().size()
@@ -319,18 +318,18 @@ private void showManageCoursesDialog() {
         JTable table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        // Optional: Color code the status column (Custom Renderer)
+        
         table.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 String status = (String) value;
                 if ("Admin Approved".equals(status)) {
-                    setForeground(new Color(0, 128, 0)); // Green
+                    setForeground(new Color(0, 128, 0)); 
                 } else if ("Admin Rejected".equals(status)) {
                     setForeground(Color.RED);
                 } else {
-                    setForeground(new Color(200, 150, 0)); // Orange/Gold
+                    setForeground(new Color(200, 150, 0)); 
                 }
                 return c;
             }
@@ -350,7 +349,7 @@ private void showManageCoursesDialog() {
         btnPanel.add(closeBtn);
         dialog.add(btnPanel, BorderLayout.SOUTH);
 
-        // ... (The button Listeners remain exactly the same as your original code) ...
+       
         
         editBtn.addActionListener(e -> {
             int selectedRow = table.getSelectedRow();

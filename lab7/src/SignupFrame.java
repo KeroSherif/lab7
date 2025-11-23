@@ -22,7 +22,7 @@ public class SignupFrame extends JFrame {
     private LoginService loginService;
 
     public SignupFrame() {
-        // استخدم getInstance()
+        
         this.loginService = new LoginService(JsonDatabaseManager.getInstance());
         setTitle("Signup");
         setSize(450, 400);
@@ -109,7 +109,7 @@ public class SignupFrame extends JFrame {
              User newUser = loginService.signup(user, email, pass, role);
              JOptionPane.showMessageDialog(this, "Account Created Successfully! Please Login in.");
              dispose();
-             new LoginFrame().setVisible(true); // صححت setVisible
+             new LoginFrame().setVisible(true); 
          }catch(Exception ex){
              JOptionPane.showMessageDialog(this, "Signup Failed: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
          }

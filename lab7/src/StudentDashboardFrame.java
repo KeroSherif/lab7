@@ -189,7 +189,7 @@ public class StudentDashboardFrame extends JFrame {
         JTable table = new JTable(model);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        // Make the status column stand out with colors
+       
         table.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -199,11 +199,11 @@ public class StudentDashboardFrame extends JFrame {
                 if (column == 6 && !isSelected) { // Status column
                     String status = value.toString();
                     if (status.contains("COMPLETED")) {
-                        c.setBackground(new java.awt.Color(200, 255, 200)); // Light green
-                        c.setForeground(new java.awt.Color(0, 100, 0)); // Dark green
+                        c.setBackground(new java.awt.Color(200, 255, 200)); 
+                        c.setForeground(new java.awt.Color(0, 100, 0)); 
                     } else if (status.equals("In Progress")) {
-                        c.setBackground(new java.awt.Color(255, 255, 200)); // Light yellow
-                        c.setForeground(new java.awt.Color(100, 100, 0)); // Dark yellow
+                        c.setBackground(new java.awt.Color(255, 255, 200)); 
+                        c.setForeground(new java.awt.Color(100, 100, 0)); 
                     } else {
                         c.setBackground(java.awt.Color.WHITE);
                         c.setForeground(java.awt.Color.BLACK);
@@ -283,15 +283,15 @@ public class StudentDashboardFrame extends JFrame {
         dialog.setLayout(new BorderLayout());
         dialog.setLocationRelativeTo(this);
         
-        // Add instructions panel at the top
+        
         JPanel instructionsPanel = new JPanel();
         instructionsPanel.setLayout(new BoxLayout(instructionsPanel, BoxLayout.Y_AXIS));
         instructionsPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
-        JLabel instructionLabel = new JLabel("<html><b>📚 Instructions:</b><br>" +
+        JLabel instructionLabel = new JLabel("<html><b> Instructions:</b><br>" +
             "• Lessons <u>without quiz</u>: Click 'Mark as Completed' after studying<br>" +
             "• Lessons <u>with quiz</u>: Must take quiz and score ≥50% to complete<br>" +
-            "• Complete all lessons to earn your certificate! 🏆</html>");
+            "• Complete all lessons to earn your certificate! </html>");
         instructionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         instructionsPanel.add(instructionLabel);
         
@@ -309,16 +309,16 @@ public class StudentDashboardFrame extends JFrame {
         List<QuizResult> allQuizResults = dbManager.loadQuizResults();
         
         for (Lesson lesson : lessons) {
-            String status = completed.contains(lesson.getLessonId()) ? "✓ Completed" : "Not Completed";
+            String status = completed.contains(lesson.getLessonId()) ? " Completed" : "Not Completed";
             String hasQuiz = (lesson.getQuestions() != null && !lesson.getQuestions().isEmpty()) ? "Yes" : "No";
             
-            // Find the latest quiz score for this lesson
+          
             String scoreText = "-";
             if (lesson.getQuestions() != null && !lesson.getQuestions().isEmpty()) {
                 QuizResult latestResult = allQuizResults.stream()
                     .filter(qr -> qr.getStudentId().equals(currentUser.getUserId()) 
                                && qr.getLessonId().equals(lesson.getLessonId()))
-                    .reduce((first, second) -> second) // Get the last one
+                    .reduce((first, second) -> second) 
                     .orElse(null);
                 
                 if (latestResult != null) {
@@ -339,7 +339,7 @@ public class StudentDashboardFrame extends JFrame {
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setRowHeight(25);
         
-        // Color code the table rows
+        
         table.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, 
@@ -347,13 +347,13 @@ public class StudentDashboardFrame extends JFrame {
                 Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 
                 if (!isSelected) {
-                    String status = (String) model.getValueAt(row, 2); // Status column
-                    String hasQuiz = (String) model.getValueAt(row, 3); // Quiz column
+                    String status = (String) model.getValueAt(row, 2); 
+                    String hasQuiz = (String) model.getValueAt(row, 3); 
                     
                     if (status.contains("Completed")) {
-                        c.setBackground(new java.awt.Color(220, 255, 220)); // Light green
+                        c.setBackground(new java.awt.Color(220, 255, 220)); 
                     } else if ("Yes".equals(hasQuiz)) {
-                        c.setBackground(new java.awt.Color(255, 240, 220)); // Light orange (has quiz)
+                        c.setBackground(new java.awt.Color(255, 240, 220)); 
                     } else {
                         c.setBackground(java.awt.Color.WHITE);
                     }
@@ -420,14 +420,14 @@ public class StudentDashboardFrame extends JFrame {
                 return;
             }
 
-            // Take the quiz
+            
             QuizTakerDialog quizDialog = new QuizTakerDialog(this, lesson.getTitle(), lesson.getQuestions());
             quizDialog.setVisible(true);
 
-            // Save quiz result and update completion
+            
             if (quizDialog.isQuizCompleted()) {
                 try {
-                    // Save quiz result
+                   
                     QuizResult qr = new QuizResult(
                         currentUser.getUserId(),
                         courseId,
@@ -436,7 +436,7 @@ public class StudentDashboardFrame extends JFrame {
                     );
                     dbManager.saveQuizResult(qr);
                     
-                    // Mark lesson as completed
+                    
                     boolean success = studentService.completeLesson(
                         currentUser.getUserId(), 
                         courseId, 
@@ -444,11 +444,11 @@ public class StudentDashboardFrame extends JFrame {
                     );
                     
                     if (success) {
-                        // Update table
+                       
                         model.setValueAt("✓ Completed", row, 2);
                         model.setValueAt(quizDialog.getScore() + "%", row, 4);
                         
-                        // Refresh user data from database
+                        
                         try {
                             currentUser = dbManager.findUserById(currentUser.getUserId()).orElse(currentUser);
                         } catch (IOException refreshEx) {
@@ -458,7 +458,7 @@ public class StudentDashboardFrame extends JFrame {
                         // Check if course is completed
                         if (studentService.isCourseCompleted(currentUser.getUserId(), courseId)) {
                             JOptionPane.showMessageDialog(dialog, 
-                                "🎉 Congratulations!\n\nYou have completed all lessons in this course!\n" +
+                                " Congratulations!\n\nYou have completed all lessons in this course!\n" +
                                 "A certificate has been generated for you.", 
                                 "Course Completed!", 
                                 JOptionPane.INFORMATION_MESSAGE);
@@ -466,7 +466,7 @@ public class StudentDashboardFrame extends JFrame {
                             Student student = (Student) currentUser;
                             studentService.generateCertificate(student, courseId);
                             
-                            // Close dialog and refresh course list
+                            
                             dialog.dispose();
                             SwingUtilities.invokeLater(() -> showEnrolledCoursesDialog());
                         }
@@ -500,7 +500,7 @@ public class StudentDashboardFrame extends JFrame {
             String hasQuiz = (String) model.getValueAt(row, 3);
             String currentScore = (String) model.getValueAt(row, 4);
 
-            // If lesson has a quiz, MUST take and pass it first!
+            
             if ("Yes".equals(hasQuiz)) {
                 if ("-".equals(currentScore)) {
                     JOptionPane.showMessageDialog(dialog, 
@@ -512,12 +512,12 @@ public class StudentDashboardFrame extends JFrame {
                     return;
                 }
                 
-                // Check if score is passing (>= 50%)
+               
                 try {
                     int score = Integer.parseInt(currentScore.replace("%", ""));
                     if (score < 50) {
                         JOptionPane.showMessageDialog(dialog, 
-                            "❌ You scored " + score + "% on the quiz.\n\n" +
+                            " You scored " + score + "% on the quiz.\n\n" +
                             "You need at least 50% to complete this lesson.\n\n" +
                             "Please retake the quiz.", 
                             "Quiz Not Passed", 
@@ -534,14 +534,14 @@ public class StudentDashboardFrame extends JFrame {
                 
                 // If we reach here, quiz is passed - lesson should already be marked complete
                 JOptionPane.showMessageDialog(dialog, 
-                    "✓ This lesson is already completed!\n\n" +
+                    " This lesson is already completed!\n\n" +
                     "You passed the quiz with " + currentScore, 
                     "Already Completed", 
                     JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
-            // No quiz - allow manual completion
+          
             try {
                 boolean success = studentService.completeLesson(
                     currentUser.getUserId(), 
@@ -550,9 +550,9 @@ public class StudentDashboardFrame extends JFrame {
                 );
                 
                 if (success) {
-                    model.setValueAt("✓ Completed", row, 2);
+                    model.setValueAt(" Completed", row, 2);
                     
-                    // Refresh user data from database
+                    
                     try {
                         currentUser = dbManager.findUserById(currentUser.getUserId()).orElse(currentUser);
                     } catch (IOException refreshEx) {
@@ -564,7 +564,7 @@ public class StudentDashboardFrame extends JFrame {
                         "Success", 
                         JOptionPane.INFORMATION_MESSAGE);
                     
-                    // Check course completion
+                    
                     if (studentService.isCourseCompleted(currentUser.getUserId(), courseId)) {
                         JOptionPane.showMessageDialog(dialog, 
                             "🎉 Congratulations!\n\nYou have completed all lessons in this course!\n" +
@@ -575,7 +575,7 @@ public class StudentDashboardFrame extends JFrame {
                         Student student = (Student) currentUser;
                         studentService.generateCertificate(student, courseId);
                         
-                        // Close dialog and refresh course list
+                        
                         dialog.dispose();
                         SwingUtilities.invokeLater(() -> showEnrolledCoursesDialog());
                     }
@@ -595,7 +595,7 @@ public class StudentDashboardFrame extends JFrame {
 
         back.addActionListener(e -> {
             dialog.dispose();
-            // Refresh the enrolled courses dialog to show updated progress
+            
             SwingUtilities.invokeLater(() -> showEnrolledCoursesDialog());
         });
 

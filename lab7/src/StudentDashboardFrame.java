@@ -687,4 +687,23 @@ public class StudentDashboardFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+    JButton certBtn = new JButton("View Certificate");
+    panel.add(certBtn);
+    certBtn.addActionListener(e -> {
+    StudentService service = new StudentService();
+    List<Lesson> lessons = JsonDatabaseManager.getLessonsByCourseId(selectedCourseId);
+
+    if (service.isCourseCompleted(currentStudent, lessons)) {
+        Map<String, String> cert = service.generateCertificate(currentStudent, selectedCourseId);
+        JOptionPane.showMessageDialog(this,
+            "Certificate Generated!\nCertificate ID: " + cert.get("certificateId")
+        );
+    } else {
+        JOptionPane.showMessageDialog(this,
+            "You must complete all lessons and quizzes before earning the certificate."
+        );
+    }
+    });
+
+
 }

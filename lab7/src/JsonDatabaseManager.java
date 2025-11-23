@@ -182,4 +182,14 @@ public class JsonDatabaseManager {
         Optional<Course> existingCourse = findCourseById(courseId);
         return existingCourse.isPresent();
     }
+    public static void saveCertificate(Map<String, String> certificate) {
+    try {
+        JSONArray arr = readJsonArray("certificates.json");
+        arr.put(new JSONObject(certificate));
+        writeJsonArray("certificates.json", arr);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
 }

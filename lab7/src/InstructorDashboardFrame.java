@@ -1,5 +1,6 @@
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
@@ -262,130 +263,138 @@ public class InstructorDashboardFrame extends JFrame {
     }
 
     // ==================== Manage Courses ====================
-    private void showManageCoursesDialog() {
-        try {
-            List<Course> allCourses = dbManager.loadCourses();
-            List<Course> instructorCourses = allCourses.stream()
-                    .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
-                    .collect(java.util.stream.Collectors.toList());
+    // In InstructorDashboardFrame.java
 
-            if (instructorCourses.isEmpty()) {
-                JOptionPane.showMessageDialog(this,
-                        "You haven't created any courses yet.",
-                        "My Courses",
-                        JOptionPane.INFORMATION_MESSAGE);
+private void showManageCoursesDialog() {
+    try {
+        List<Course> allCourses = dbManager.loadCourses();
+        List<Course> instructorCourses = allCourses.stream()
+                .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (instructorCourses.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "You haven't created any courses yet.",
+                    "My Courses",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        JDialog dialog = new JDialog(this, "Manage My Courses", true);
+        dialog.setSize(900, 500); // Made slightly wider to fit the status
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+
+        // 1. ADD "Status" TO COLUMNS
+        String[] columns = {"Course ID", "Title", "Status", "Description", "Students", "Lessons"};
+        
+        DefaultTableModel model = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        for (Course course : instructorCourses) {
+            // 2. DETERMINE STATUS TEXT
+            String statusText;
+            if (course.getApprovalStatus() == Course.ApprovalStatus.APPROVED) {
+                statusText = "Admin Approved";
+            } else if (course.getApprovalStatus() == Course.ApprovalStatus.REJECTED) {
+                statusText = "Admin Rejected";
+            } else {
+                statusText = "Pending Admin Approval";
+            }
+
+            model.addRow(new Object[]{
+                course.getCourseId(),
+                course.getTitle(),
+                statusText, // Add the status text here
+                course.getDescription(),
+                course.getStudents().size(),
+                course.getLessons().size()
+            });
+        }
+
+        JTable table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        // Optional: Color code the status column (Custom Renderer)
+        table.getColumnModel().getColumn(2).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                String status = (String) value;
+                if ("Admin Approved".equals(status)) {
+                    setForeground(new Color(0, 128, 0)); // Green
+                } else if ("Admin Rejected".equals(status)) {
+                    setForeground(Color.RED);
+                } else {
+                    setForeground(new Color(200, 150, 0)); // Orange/Gold
+                }
+                return c;
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        dialog.add(scrollPane, BorderLayout.CENTER);
+
+        JPanel btnPanel = new JPanel();
+        JButton editBtn = new JButton("Edit Course");
+        JButton deleteBtn = new JButton("Delete Course");
+        JButton manageLessonsBtn = new JButton("Manage Lessons");
+        JButton closeBtn = new JButton("Close");
+        btnPanel.add(editBtn);
+        btnPanel.add(deleteBtn);
+        btnPanel.add(manageLessonsBtn);
+        btnPanel.add(closeBtn);
+        dialog.add(btnPanel, BorderLayout.SOUTH);
+
+        // ... (The button Listeners remain exactly the same as your original code) ...
+        
+        editBtn.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(dialog, "Please select a course first.", "No Selection", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+            String courseId = (String) model.getValueAt(selectedRow, 0);
+            Course selectedCourse = instructorCourses.stream().filter(c -> c.getCourseId().equals(courseId)).findFirst().orElse(null);
+            if (selectedCourse != null) showEditCourseDialog(selectedCourse, dialog);
+        });
 
-            JDialog dialog = new JDialog(this, "Manage My Courses", true);
-            dialog.setSize(800, 500);
-            dialog.setLocationRelativeTo(this);
-            dialog.setLayout(new BorderLayout());
-
-            String[] columns = {"Course ID", "Title", "Description", "Students", "Lessons"};
-            DefaultTableModel model = new DefaultTableModel(columns, 0) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false;
-                }
-            };
-
-            for (Course course : instructorCourses) {
-                model.addRow(new Object[]{
-                    course.getCourseId(),
-                    course.getTitle(),
-                    course.getDescription(),
-                    course.getStudents().size(),
-                    course.getLessons().size()
-                });
+        deleteBtn.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(dialog, "Please select a course first.", "No Selection", JOptionPane.WARNING_MESSAGE);
+                return;
             }
-
-            JTable table = new JTable(model);
-            table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-            JScrollPane scrollPane = new JScrollPane(table);
-            dialog.add(scrollPane, BorderLayout.CENTER);
-
-            JPanel btnPanel = new JPanel();
-            JButton editBtn = new JButton("Edit Course");
-            JButton deleteBtn = new JButton("Delete Course");
-            JButton manageLessonsBtn = new JButton("Manage Lessons");
-            JButton closeBtn = new JButton("Close");
-            btnPanel.add(editBtn);
-            btnPanel.add(deleteBtn);
-            btnPanel.add(manageLessonsBtn);
-            btnPanel.add(closeBtn);
-            dialog.add(btnPanel, BorderLayout.SOUTH);
-
-            editBtn.addActionListener(e -> {
-                int selectedRow = table.getSelectedRow();
-                if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(dialog,
-                            "Please select a course first.",
-                            "No Selection",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                String courseId = (String) model.getValueAt(selectedRow, 0);
-                Course selectedCourse = instructorCourses.stream()
-                        .filter(c -> c.getCourseId().equals(courseId))
-                        .findFirst()
-                        .orElse(null);
-                if (selectedCourse != null) {
-                    showEditCourseDialog(selectedCourse, dialog);
-                }
-            });
-
-            deleteBtn.addActionListener(e -> {
-                int selectedRow = table.getSelectedRow();
-                if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(dialog,
-                            "Please select a course first.",
-                            "No Selection",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                String courseId = (String) model.getValueAt(selectedRow, 0);
-                String courseTitle = (String) model.getValueAt(selectedRow, 1);
-                int confirm = JOptionPane.showConfirmDialog(dialog,
-                        "Are you sure you want to delete:\n" + courseTitle + " (" + courseId + ")?\nThis will unenroll all students!",
-                        "Confirm Delete",
-                        JOptionPane.YES_NO_OPTION,
-                        JOptionPane.WARNING_MESSAGE);
-                if (confirm == JOptionPane.YES_OPTION) {
-                    try {
-                        boolean success = instructorService.deleteCourse(currentUser.getUserId(), courseId);
-                        if (success) {
-                            model.removeRow(selectedRow);
-                            JOptionPane.showMessageDialog(dialog,
-                                    "Course deleted successfully!",
-                                    "Success",
-                                    JOptionPane.INFORMATION_MESSAGE);
-                        } else {
-                            JOptionPane.showMessageDialog(dialog,
-                                    "Failed to delete course.",
-                                    "Error",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
-                    } catch (IOException ex) {
-                        JOptionPane.showMessageDialog(dialog,
-                                "Error deleting course: " + ex.getMessage(),
-                                "Error",
-                                JOptionPane.ERROR_MESSAGE);
+            String courseId = (String) model.getValueAt(selectedRow, 0);
+            String courseTitle = (String) model.getValueAt(selectedRow, 1);
+            int confirm = JOptionPane.showConfirmDialog(dialog, "Are you sure you want to delete:\n" + courseTitle + " (" + courseId + ")?\nThis will unenroll all students!", "Confirm Delete", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    boolean success = instructorService.deleteCourse(currentUser.getUserId(), courseId);
+                    if (success) {
+                        model.removeRow(selectedRow);
+                        JOptionPane.showMessageDialog(dialog, "Course deleted successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(dialog, "Failed to delete course.", "Error", JOptionPane.ERROR_MESSAGE);
                     }
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(dialog, "Error deleting course: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
-            });
+            }
+        });
 
-            manageLessonsBtn.addActionListener(e -> {
-                int selectedRow = table.getSelectedRow();
-                if (selectedRow == -1) {
-                    JOptionPane.showMessageDialog(dialog,
-                            "Please select a course first.",
-                            "No Selection",
-                            JOptionPane.WARNING_MESSAGE);
-                    return;
-                }
-                String courseId = (String) model.getValueAt(selectedRow, 0);
-                String courseTitle = (String) model.getValueAt(selectedRow, 1);
+        manageLessonsBtn.addActionListener(e -> {
+            int selectedRow = table.getSelectedRow();
+            if (selectedRow == -1) {
+                JOptionPane.showMessageDialog(dialog, "Please select a course first.", "No Selection", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            String courseId = (String) model.getValueAt(selectedRow, 0);
+            String courseTitle = (String) model.getValueAt(selectedRow, 1);
                 dialog.dispose();
                 showManageLessonsDialog(courseId, courseTitle);
             });
@@ -393,10 +402,7 @@ public class InstructorDashboardFrame extends JFrame {
             closeBtn.addActionListener(e -> dialog.dispose());
             dialog.setVisible(true);
         } catch (IOException ex) {
-            JOptionPane.showMessageDialog(this,
-                    "Error loading courses: " + ex.getMessage(),
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -774,6 +780,7 @@ public class InstructorDashboardFrame extends JFrame {
         cancelBtn.addActionListener(e -> dialog.dispose());
         dialog.setVisible(true);
     }
+    
 
     // ==================== View Enrolled Students ====================
     private void showViewStudentsDialog() {

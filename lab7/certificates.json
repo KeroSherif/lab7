@@ -1,0 +1,16 @@
+[ {
+  "studentId" : "U1",
+  "certificateId" : "CERT-ea05dac3",
+  "issueDate" : "2025-11-23",
+  "courseId" : "702"
+}, {
+  "studentId" : "U1",
+  "certificateId" : "CERT-6b59a610",
+  "issueDate" : "2025-11-23",
+  "courseId" : "702"
+}, {
+  "studentId" : "U1",
+  "certificateId" : "CERT-fa32c8ef",
+  "issueDate" : "2025-11-23",
+  "courseId" : "703"
+} ]

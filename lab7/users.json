@@ -4,16 +4,83 @@
   "username" : "kero",
   "email" : "kero@gmail.com",
   "passwordHash" : "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-  "enrolledCourses" : [ "702" ],
+  "enrolledCourses" : [ "702", "703" ],
   "progress" : {
-    "702" : [ ]
+    "702" : [ "102", "101" ],
+    "703" : [ "101" ]
   },
-  "notifications" : [ "You completed the course: Linear Algebra on Sun Nov 16 22:38:04 EET 2025" ]
+  "notifications" : [ "You completed the course: Linear Algebra on Sun Nov 16 22:38:04 EET 2025" ],
+  "certificates" : [ {
+    "studentId" : "U1",
+    "certificateId" : "CERT-9b2ba49e",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-36983644",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-7b79ec3f",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-9de7dd90",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-24b7e1b8",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-b7b4197d",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-96201c66",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-f009ce0e",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-cf850321",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-0aeb12cb",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-ea05dac3",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-6b59a610",
+    "issueDate" : "2025-11-23",
+    "courseId" : "702"
+  }, {
+    "studentId" : "U1",
+    "certificateId" : "CERT-fa32c8ef",
+    "issueDate" : "2025-11-23",
+    "courseId" : "703"
+  } ]
 }, {
   "userId" : "U2",
   "role" : "instructor",
   "username" : "kirolos",
   "email" : "kirolos@gmail.com",
   "passwordHash" : "8bb0cf6eb9b17d0f7d22b456f121257dc1254e1f01665370476383ea776df414",
-  "createdCourses" : [ ]
+  "createdCourses" : [ "703" ]
 } ]

@@ -3,7 +3,45 @@
   "title" : "physics",
   "description" : "phisics is dangerous",
   "instructorId" : "U2",
-  "lessons" : [ ],
+  "lessons" : [ {
+    "lessonId" : "101",
+    "title" : "chapter1",
+    "content" : "units",
+    "resources" : [ ],
+    "questions" : [ ]
+  }, {
+    "lessonId" : "102",
+    "title" : "chapter2",
+    "content" : "heat transfer",
+    "resources" : [ ],
+    "questions" : [ {
+      "correctOptionIndex" : 0,
+      "questionText" : "dsffgfbyth",
+      "options" : [ "a", "b", "c", "d" ]
+    }, {
+      "correctOptionIndex" : 0,
+      "questionText" : "",
+      "options" : [ "", "", "", "" ]
+    } ]
+  } ],
+  "students" : [ "U1" ],
+  "approvalStatus" : "APPROVED"
+}, {
+  "courseId" : "703",
+  "title" : "English",
+  "description" : "sdfsc",
+  "instructorId" : "U2",
+  "lessons" : [ {
+    "lessonId" : "101",
+    "title" : "chapter 1",
+    "content" : "fdgefvve",
+    "resources" : [ ],
+    "questions" : [ {
+      "correctOptionIndex" : 0,
+      "questionText" : "adf;wf",
+      "options" : [ "a", "b", "c", "d" ]
+    } ]
+  } ],
   "students" : [ "U1" ],
   "approvalStatus" : "APPROVED"
 } ]

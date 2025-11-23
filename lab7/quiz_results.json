@@ -1,1 +1,6 @@
-[ ]
+[ {
+  "studentId" : "U1",
+  "courseId" : "703",
+  "lessonId" : "101",
+  "score" : 100
+} ]

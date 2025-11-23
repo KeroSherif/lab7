@@ -1,9 +1,11 @@
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class StudentService {
+
     private JsonDatabaseManager db;
 
     public StudentService(JsonDatabaseManager db) {
@@ -91,10 +93,14 @@ public class StudentService {
         if (!s.getEnrolledCourses().contains(courseId)) {
             System.out.println("StudentService: Student " + studentId + " is not enrolled in course " + courseId);
             return false;
+        } 
+        if (s.getProgress() == null) {
+            s.setProgress(new HashMap<>());
         }
 
         s.markLessonCompleted(courseId, lessonId);
-        db.saveUsers(allUsers);
+        db.saveUsers(allUsers); 
+        
         System.out.println("StudentService: Lesson " + lessonId + " marked as completed for student " + studentId + " in course " + courseId);
         return true;
     }
@@ -225,27 +231,28 @@ public class StudentService {
         return completedCourseIds;
     }
 
-    // ✅ تم إزالة الدالة الزائدة: isCourseCompleted(Student, List<Lesson>)
-    // لأن النظام يعتمد على progress فقط، وليس الكويزات.
-
-    public Map<String, String> generateCertificate(Student student, String courseId) {
+    public Map<String, String> generateCertificate(Student updatedStudent, String courseId) {
         Map<String, String> cert = new HashMap<>();
         String certId = "CERT-" + java.util.UUID.randomUUID().toString().substring(0, 8);
         cert.put("certificateId", certId);
-        cert.put("studentId", student.getUserId()); // ← صححت getId() إلى getUserId()
+        cert.put("studentId", updatedStudent.getUserId());
         cert.put("courseId", courseId);
         cert.put("issueDate", LocalDate.now().toString());
-        
-        student.addCertificate(cert);
-        
-       
+        updatedStudent.addCertificate(cert);
         try {
-            db.saveUser(student);
+            List<User> allUsers = db.loadUsers();
+            for (int i = 0; i < allUsers.size(); i++) {
+                User u = allUsers.get(i);
+                if (u instanceof Student && u.getUserId().equals(updatedStudent.getUserId())) {
+                    allUsers.set(i, updatedStudent);
+                    break;
+                }
+            }
+            db.saveUsers(allUsers);
             db.saveCertificate(cert);
         } catch (IOException e) {
             System.err.println("Failed to save certificate: " + e.getMessage());
         }
-        
         return cert;
     }
 }

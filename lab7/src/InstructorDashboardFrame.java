@@ -1,16 +1,11 @@
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
-/**
- *
- * @author DANAH
- */
 public class InstructorDashboardFrame extends JFrame {
 
     private User currentUser;
@@ -18,100 +13,169 @@ public class InstructorDashboardFrame extends JFrame {
     private JsonDatabaseManager dbManager;
 
     public InstructorDashboardFrame(User user) {
-       this.currentUser = user;
-    this.dbManager = JsonDatabaseManager.getInstance();
-    this.instructorService = new InstructorService(dbManager);
-    setTitle("Instructor Dashboard - " + user.getUsername());
-    setSize(600, 400);
-    setLocationRelativeTo(null);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    setLayout(new GridLayout(6, 1)); 
+        this.currentUser = user;
+        this.dbManager = JsonDatabaseManager.getInstance();
+        this.instructorService = new InstructorService(dbManager);
 
-    JLabel title = new JLabel("Welcome " + user.getUsername() + "!", SwingConstants.CENTER);
-    title.setFont(new Font("Arial", Font.BOLD, 20));
-    add(title);
+        setTitle("Instructor Dashboard - " + user.getUsername());
+        setSize(600, 450);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new GridLayout(7, 1));
 
-    JButton createBtn = new JButton("Create Course");
-    JButton manageBtn = new JButton("Manage Courses");
-    JButton viewStudentsBtn = new JButton("View Enrolled Students");
-    JButton myProfileBtn = new JButton("My Profile"); // ← جديد
-    JButton logoutBtn = new JButton("Logout");
+        JLabel title = new JLabel("Welcome " + user.getUsername() + "!", SwingConstants.CENTER);
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        add(title);
 
-    add(createBtn);
-    add(manageBtn);
-    add(viewStudentsBtn);
-    add(myProfileBtn); 
-    add(logoutBtn);
+        JButton createBtn = new JButton("Create Course");
+        JButton manageBtn = new JButton("Manage Courses");
+        JButton viewStudentsBtn = new JButton("View Enrolled Students");
+        JButton insightsBtn = new JButton("View Insights");
+        JButton chartsBtn = new JButton("View Charts");
+        JButton myProfileBtn = new JButton("My Profile");
+        JButton logoutBtn = new JButton("Logout");
 
-    createBtn.addActionListener(e -> showCreateCourseDialog());
-    manageBtn.addActionListener(e -> showManageCoursesDialog());
-    viewStudentsBtn.addActionListener(e -> showViewStudentsDialog());
-    myProfileBtn.addActionListener(e -> showMyProfile()); // ← موجود مسبقًا
-    logoutBtn.addActionListener(e -> {
-        dispose();
-        new LoginFrame().setVisible(true);
+        add(createBtn);
+        add(manageBtn);
+        add(viewStudentsBtn);
+        add(insightsBtn);
+        add(chartsBtn);
+        add(myProfileBtn);
+        add(logoutBtn);
+
+        // Action Listeners
+        createBtn.addActionListener(e -> showCreateCourseDialog());
+        manageBtn.addActionListener(e -> showManageCoursesDialog());
+        viewStudentsBtn.addActionListener(e -> showViewStudentsDialog());
+
+        insightsBtn.addActionListener(e -> {
+            new InstructorInsightsFrame(currentUser.getUserId()).setVisible(true);
+        });
+
+        chartsBtn.addActionListener(e -> {
+            String[] options = {
+                "📊 Course Completion Progress",
+                "🎯 Quiz Performance",
+                "👥 Student Enrollment",
+                "📈 View All Charts"
+            };
+
+            int choice = JOptionPane.showOptionDialog(
+                    this,
+                    "Select which chart you want to view:",
+                    "Charts & Analytics",
+                    JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    options,
+                    options[3]
+            );
+
+            if (choice >= 0) {
+                final String userId = currentUser.getUserId();
+                SwingUtilities.invokeLater(() -> {
+                    try {
+                        switch (choice) {
+                            case 0:
+                                new ProgressChartFrame(userId).setVisible(true);
+                                break;
+                            case 1:
+                                new QuizBarChartFrame(userId).setVisible(true);
+                                break;
+                            case 2:
+                                new StudentEnrollmentPieChart(userId).setVisible(true);
+                                break;
+                            case 3:
+                                new ProgressChartFrame(userId).setVisible(true);
+                                new QuizBarChartFrame(userId).setVisible(true);
+                                new StudentEnrollmentPieChart(userId).setVisible(true);
+                                break;
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(this,
+                                "Error opening chart: " + ex.getMessage(),
+                                "Error",
+                                JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+                    }
+                });
+            }
+        });
+
+        myProfileBtn.addActionListener(e -> showMyProfile());
+
+        logoutBtn.addActionListener(e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
         });
     }
-    //===================== show Quiz Dialog =====================
 
+    // ==================== Manage Quiz Dialog ====================
     private List<Question> showManageQuizDialog(JDialog parent, List<Question> existingQuestions) {
-    // Use existing list or create new
-    List<Question> tempQuestions = (existingQuestions != null) ? new ArrayList<>(existingQuestions) : new ArrayList<>();
-    
-    JDialog dialog = new JDialog(parent, "Manage Quiz", true);
-    dialog.setSize(600, 500);
-    dialog.setLayout(new BorderLayout());
-    
-    DefaultTableModel model = new DefaultTableModel(new String[]{"Question", "Correct Answer"}, 0);
-    for(Question q : tempQuestions) {
-        model.addRow(new Object[]{q.getQuestionText(), q.getOptions().get(q.getCorrectOptionIndex())});
+        List<Question> tempQuestions = (existingQuestions != null) ? new ArrayList<>(existingQuestions) : new ArrayList<>();
+        JDialog dialog = new JDialog(parent, "Manage Quiz", true);
+        dialog.setSize(600, 500);
+        dialog.setLayout(new BorderLayout());
+
+        DefaultTableModel model = new DefaultTableModel(new String[]{"Question", "Correct Answer"}, 0);
+        for (Question q : tempQuestions) {
+            model.addRow(new Object[]{q.getQuestionText(), q.getOptions().get(q.getCorrectOptionIndex())});
+        }
+
+        JTable table = new JTable(model);
+        dialog.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        JPanel inputPanel = new JPanel(new GridLayout(6, 2));
+        JTextField qField = new JTextField();
+        JTextField opt1 = new JTextField();
+        JTextField opt2 = new JTextField();
+        JTextField opt3 = new JTextField();
+        JTextField opt4 = new JTextField();
+        JComboBox<String> correctBox = new JComboBox<>(new String[]{"Option 1", "Option 2", "Option 3", "Option 4"});
+
+        inputPanel.add(new JLabel("Question:"));
+        inputPanel.add(qField);
+        inputPanel.add(new JLabel("Option 1:"));
+        inputPanel.add(opt1);
+        inputPanel.add(new JLabel("Option 2:"));
+        inputPanel.add(opt2);
+        inputPanel.add(new JLabel("Option 3:"));
+        inputPanel.add(opt3);
+        inputPanel.add(new JLabel("Option 4:"));
+        inputPanel.add(opt4);
+        inputPanel.add(new JLabel("Correct One:"));
+        inputPanel.add(correctBox);
+
+        dialog.add(inputPanel, BorderLayout.NORTH);
+
+        JPanel btnPanel = new JPanel();
+        JButton addBtn = new JButton("Add Question");
+        JButton saveBtn = new JButton("Save Quiz");
+
+        addBtn.addActionListener(e -> {
+            List<String> opts = new ArrayList<>();
+            opts.add(opt1.getText());
+            opts.add(opt2.getText());
+            opts.add(opt3.getText());
+            opts.add(opt4.getText());
+            Question q = new Question(qField.getText(), opts, correctBox.getSelectedIndex());
+            tempQuestions.add(q);
+            model.addRow(new Object[]{q.getQuestionText(), opts.get(q.getCorrectOptionIndex())});
+            qField.setText("");
+            opt1.setText("");
+            opt2.setText("");
+            opt3.setText("");
+            opt4.setText("");
+        });
+
+        saveBtn.addActionListener(e -> dialog.dispose());
+        btnPanel.add(addBtn);
+        btnPanel.add(saveBtn);
+        dialog.add(btnPanel, BorderLayout.SOUTH);
+
+        dialog.setVisible(true);
+        return tempQuestions;
     }
-    JTable table = new JTable(model);
-    dialog.add(new JScrollPane(table), BorderLayout.CENTER);
-    
-    JPanel inputPanel = new JPanel(new GridLayout(6, 2));
-    JTextField qField = new JTextField();
-    JTextField opt1 = new JTextField();
-    JTextField opt2 = new JTextField();
-    JTextField opt3 = new JTextField();
-    JTextField opt4 = new JTextField();
-    JComboBox<String> correctBox = new JComboBox<>(new String[]{"Option 1", "Option 2", "Option 3", "Option 4"});
-    
-    inputPanel.add(new JLabel("Question:")); inputPanel.add(qField);
-    inputPanel.add(new JLabel("Option 1:")); inputPanel.add(opt1);
-    inputPanel.add(new JLabel("Option 2:")); inputPanel.add(opt2);
-    inputPanel.add(new JLabel("Option 3:")); inputPanel.add(opt3);
-    inputPanel.add(new JLabel("Option 4:")); inputPanel.add(opt4);
-    inputPanel.add(new JLabel("Correct One:")); inputPanel.add(correctBox);
-    
-    dialog.add(inputPanel, BorderLayout.NORTH);
-    
-    JPanel btnPanel = new JPanel();
-    JButton addBtn = new JButton("Add Question");
-    JButton saveBtn = new JButton("Save Quiz");
-    
-    addBtn.addActionListener(e -> {
-        List<String> opts = new ArrayList<>();
-        opts.add(opt1.getText()); opts.add(opt2.getText()); 
-        opts.add(opt3.getText()); opts.add(opt4.getText());
-        
-        Question q = new Question(qField.getText(), opts, correctBox.getSelectedIndex());
-        tempQuestions.add(q);
-        model.addRow(new Object[]{q.getQuestionText(), opts.get(q.getCorrectOptionIndex())});
-        
-        // Clear fields
-        qField.setText(""); opt1.setText(""); opt2.setText(""); opt3.setText(""); opt4.setText("");
-    });
-    
-    saveBtn.addActionListener(e -> dialog.dispose());
-    
-    btnPanel.add(addBtn);
-    btnPanel.add(saveBtn);
-    dialog.add(btnPanel, BorderLayout.SOUTH);
-    
-    dialog.setVisible(true);
-    return tempQuestions;
-}
 
     // ==================== Create Course ====================
     private void showCreateCourseDialog() {
@@ -120,21 +184,18 @@ public class InstructorDashboardFrame extends JFrame {
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridLayout(5, 1, 10, 10));
 
-        // Course ID
         JPanel idPanel = new JPanel();
         idPanel.add(new JLabel("Course ID:"));
         JTextField idField = new JTextField(20);
         idPanel.add(idField);
         dialog.add(idPanel);
 
-        // Course Title
         JPanel titlePanel = new JPanel();
         titlePanel.add(new JLabel("Title:"));
         JTextField titleField = new JTextField(20);
         titlePanel.add(titleField);
         dialog.add(titlePanel);
 
-        // Course Description
         JPanel descPanel = new JPanel(new BorderLayout());
         descPanel.add(new JLabel("Description:"), BorderLayout.NORTH);
         JTextArea descArea = new JTextArea(5, 20);
@@ -144,7 +205,6 @@ public class InstructorDashboardFrame extends JFrame {
         descPanel.add(scrollPane, BorderLayout.CENTER);
         dialog.add(descPanel);
 
-        // Buttons
         JPanel btnPanel = new JPanel();
         JButton createBtn = new JButton("Create");
         JButton cancelBtn = new JButton("Cancel");
@@ -152,21 +212,23 @@ public class InstructorDashboardFrame extends JFrame {
         btnPanel.add(cancelBtn);
         dialog.add(btnPanel);
 
-        // Create button action
         createBtn.addActionListener(e -> {
             String courseId = idField.getText().trim();
             String title = titleField.getText().trim();
             String description = descArea.getText().trim();
+
             String err = Validation.validateCourseId(courseId);
             if (!err.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+
             err = Validation.validateCourse(title, description, currentUser.getUserId());
             if (!err.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
+
             try {
                 Course newCourse = instructorService.createCourse(
                         currentUser.getUserId(),
@@ -202,7 +264,6 @@ public class InstructorDashboardFrame extends JFrame {
     // ==================== Manage Courses ====================
     private void showManageCoursesDialog() {
         try {
-            // Load instructor's courses
             List<Course> allCourses = dbManager.loadCourses();
             List<Course> instructorCourses = allCourses.stream()
                     .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
@@ -216,13 +277,11 @@ public class InstructorDashboardFrame extends JFrame {
                 return;
             }
 
-            // Create dialog
             JDialog dialog = new JDialog(this, "Manage My Courses", true);
             dialog.setSize(800, 500);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new BorderLayout());
 
-            // Create table
             String[] columns = {"Course ID", "Title", "Description", "Students", "Lessons"};
             DefaultTableModel model = new DefaultTableModel(columns, 0) {
                 @Override
@@ -233,11 +292,11 @@ public class InstructorDashboardFrame extends JFrame {
 
             for (Course course : instructorCourses) {
                 model.addRow(new Object[]{
-                        course.getCourseId(),
-                        course.getTitle(),
-                        course.getDescription(),
-                        course.getStudents().size(),
-                        course.getLessons().size()
+                    course.getCourseId(),
+                    course.getTitle(),
+                    course.getDescription(),
+                    course.getStudents().size(),
+                    course.getLessons().size()
                 });
             }
 
@@ -246,7 +305,6 @@ public class InstructorDashboardFrame extends JFrame {
             JScrollPane scrollPane = new JScrollPane(table);
             dialog.add(scrollPane, BorderLayout.CENTER);
 
-            // Buttons panel
             JPanel btnPanel = new JPanel();
             JButton editBtn = new JButton("Edit Course");
             JButton deleteBtn = new JButton("Delete Course");
@@ -258,7 +316,6 @@ public class InstructorDashboardFrame extends JFrame {
             btnPanel.add(closeBtn);
             dialog.add(btnPanel, BorderLayout.SOUTH);
 
-            // Edit Course
             editBtn.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
@@ -273,13 +330,11 @@ public class InstructorDashboardFrame extends JFrame {
                         .filter(c -> c.getCourseId().equals(courseId))
                         .findFirst()
                         .orElse(null);
-
                 if (selectedCourse != null) {
                     showEditCourseDialog(selectedCourse, dialog);
                 }
             });
 
-            // Delete Course
             deleteBtn.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
@@ -291,13 +346,11 @@ public class InstructorDashboardFrame extends JFrame {
                 }
                 String courseId = (String) model.getValueAt(selectedRow, 0);
                 String courseTitle = (String) model.getValueAt(selectedRow, 1);
-
                 int confirm = JOptionPane.showConfirmDialog(dialog,
                         "Are you sure you want to delete:\n" + courseTitle + " (" + courseId + ")?\nThis will unenroll all students!",
                         "Confirm Delete",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
-
                 if (confirm == JOptionPane.YES_OPTION) {
                     try {
                         boolean success = instructorService.deleteCourse(currentUser.getUserId(), courseId);
@@ -322,7 +375,6 @@ public class InstructorDashboardFrame extends JFrame {
                 }
             });
 
-            // Manage Lessons
             manageLessonsBtn.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
@@ -334,7 +386,6 @@ public class InstructorDashboardFrame extends JFrame {
                 }
                 String courseId = (String) model.getValueAt(selectedRow, 0);
                 String courseTitle = (String) model.getValueAt(selectedRow, 1);
-
                 dialog.dispose();
                 showManageLessonsDialog(courseId, courseTitle);
             });
@@ -356,7 +407,6 @@ public class InstructorDashboardFrame extends JFrame {
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridLayout(5, 1, 10, 10));
 
-        // Course ID (readonly)
         JPanel idPanel = new JPanel();
         idPanel.add(new JLabel("Course ID:"));
         JTextField idField = new JTextField(course.getCourseId(), 20);
@@ -364,14 +414,12 @@ public class InstructorDashboardFrame extends JFrame {
         idPanel.add(idField);
         dialog.add(idPanel);
 
-        // Course Title
         JPanel titlePanel = new JPanel();
         titlePanel.add(new JLabel("Title:"));
         JTextField titleField = new JTextField(course.getTitle(), 20);
         titlePanel.add(titleField);
         dialog.add(titlePanel);
 
-        // Course Description
         JPanel descPanel = new JPanel(new BorderLayout());
         descPanel.add(new JLabel("Description:"), BorderLayout.NORTH);
         JTextArea descArea = new JTextArea(course.getDescription(), 5, 20);
@@ -381,7 +429,6 @@ public class InstructorDashboardFrame extends JFrame {
         descPanel.add(scrollPane, BorderLayout.CENTER);
         dialog.add(descPanel);
 
-        // Buttons
         JPanel btnPanel = new JPanel();
         JButton saveBtn = new JButton("Save Changes");
         JButton cancelBtn = new JButton("Cancel");
@@ -389,17 +436,14 @@ public class InstructorDashboardFrame extends JFrame {
         btnPanel.add(cancelBtn);
         dialog.add(btnPanel);
 
-        // Save button action
         saveBtn.addActionListener(e -> {
             String newTitle = titleField.getText().trim();
             String newDescription = descArea.getText().trim();
-
             String err = Validation.validateCourse(newTitle, newDescription, currentUser.getUserId());
             if (!err.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
             try {
                 boolean success = instructorService.updateCourse(
                         currentUser.getUserId(),
@@ -444,16 +488,13 @@ public class InstructorDashboardFrame extends JFrame {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
             List<Lesson> lessons = course.getLessons();
 
-            // Create dialog
             JDialog dialog = new JDialog(this, "Manage Lessons - " + courseTitle, true);
             dialog.setSize(800, 500);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new BorderLayout());
 
-            // Create table
             String[] columns = {"Lesson ID", "Title", "Content Preview"};
             DefaultTableModel model = new DefaultTableModel(columns, 0) {
                 @Override
@@ -467,9 +508,9 @@ public class InstructorDashboardFrame extends JFrame {
                         ? lesson.getContent().substring(0, 50) + "..."
                         : lesson.getContent();
                 model.addRow(new Object[]{
-                        lesson.getLessonId(),
-                        lesson.getTitle(),
-                        preview
+                    lesson.getLessonId(),
+                    lesson.getTitle(),
+                    preview
                 });
             }
 
@@ -478,7 +519,6 @@ public class InstructorDashboardFrame extends JFrame {
             JScrollPane scrollPane = new JScrollPane(table);
             dialog.add(scrollPane, BorderLayout.CENTER);
 
-            // Buttons panel
             JPanel btnPanel = new JPanel();
             JButton addBtn = new JButton("Add Lesson");
             JButton editBtn = new JButton("Edit Lesson");
@@ -490,12 +530,7 @@ public class InstructorDashboardFrame extends JFrame {
             btnPanel.add(backBtn);
             dialog.add(btnPanel, BorderLayout.SOUTH);
 
-            // Add Lesson
-            addBtn.addActionListener(e -> {
-                showAddLessonDialog(courseId, dialog);
-            });
-
-            // Edit Lesson
+            addBtn.addActionListener(e -> showAddLessonDialog(courseId, dialog));
             editBtn.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
@@ -510,13 +545,10 @@ public class InstructorDashboardFrame extends JFrame {
                         .filter(l -> l.getLessonId().equals(lessonId))
                         .findFirst()
                         .orElse(null);
-
                 if (selectedLesson != null) {
                     showEditLessonDialog(courseId, selectedLesson, dialog);
                 }
             });
-
-            // Delete Lesson
             deleteBtn.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
@@ -528,13 +560,11 @@ public class InstructorDashboardFrame extends JFrame {
                 }
                 String lessonId = (String) model.getValueAt(selectedRow, 0);
                 String lessonTitle = (String) model.getValueAt(selectedRow, 1);
-
                 int confirm = JOptionPane.showConfirmDialog(dialog,
                         "Are you sure you want to delete:\n" + lessonTitle + " (" + lessonId + ")?",
                         "Confirm Delete",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
-
                 if (confirm == JOptionPane.YES_OPTION) {
                     try {
                         boolean success = instructorService.removeLessonFromCourse(
@@ -559,7 +589,6 @@ public class InstructorDashboardFrame extends JFrame {
                     }
                 }
             });
-
             backBtn.addActionListener(e -> {
                 dialog.dispose();
                 showManageCoursesDialog();
@@ -577,34 +606,31 @@ public class InstructorDashboardFrame extends JFrame {
     // ==================== Add Lesson ====================
     private void showAddLessonDialog(String courseId, JDialog parentDialog) {
         JDialog dialog = new JDialog(this, "Add New Lesson", true);
-        List<Question> currentQuiz = new ArrayList<>(); 
+        List<Question> currentQuiz = new ArrayList<>();
         JButton manageQuizBtn = new JButton("Attach Quiz");
         manageQuizBtn.addActionListener(e -> {
-        // Update the list with the result from the dialog
-        List<Question> updated = showManageQuizDialog(dialog, currentQuiz);
-        currentQuiz.clear();
-        currentQuiz.addAll(updated);
-        JOptionPane.showMessageDialog(dialog, "Quiz now has " + currentQuiz.size() + " questions.");
+            List<Question> updated = showManageQuizDialog(dialog, currentQuiz);
+            currentQuiz.clear();
+            currentQuiz.addAll(updated);
+            JOptionPane.showMessageDialog(dialog, "Quiz now has " + currentQuiz.size() + " questions.");
         });
+
         dialog.setSize(500, 450);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridLayout(5, 1, 10, 10));
 
-        // Lesson ID
         JPanel idPanel = new JPanel();
         idPanel.add(new JLabel("Lesson ID:"));
         JTextField idField = new JTextField(20);
         idPanel.add(idField);
         dialog.add(idPanel);
 
-        // Lesson Title
         JPanel titlePanel = new JPanel();
         titlePanel.add(new JLabel("Title:"));
         JTextField titleField = new JTextField(20);
         titlePanel.add(titleField);
         dialog.add(titlePanel);
 
-        // Lesson Content
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.add(new JLabel("Content:"), BorderLayout.NORTH);
         JTextArea contentArea = new JTextArea(5, 20);
@@ -614,7 +640,6 @@ public class InstructorDashboardFrame extends JFrame {
         contentPanel.add(scrollPane, BorderLayout.CENTER);
         dialog.add(contentPanel);
 
-        // Buttons
         JPanel btnPanel = new JPanel();
         JButton addBtn = new JButton("Add");
         JButton cancelBtn = new JButton("Cancel");
@@ -623,7 +648,6 @@ public class InstructorDashboardFrame extends JFrame {
         btnPanel.add(cancelBtn);
         dialog.add(btnPanel);
 
-        // Add button action
         addBtn.addActionListener(e -> {
             String lessonId = idField.getText().trim();
             String title = titleField.getText().trim();
@@ -680,7 +704,6 @@ public class InstructorDashboardFrame extends JFrame {
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridLayout(5, 1, 10, 10));
 
-        // Lesson ID (readonly)
         JPanel idPanel = new JPanel();
         idPanel.add(new JLabel("Lesson ID:"));
         JTextField idField = new JTextField(lesson.getLessonId(), 20);
@@ -688,14 +711,12 @@ public class InstructorDashboardFrame extends JFrame {
         idPanel.add(idField);
         dialog.add(idPanel);
 
-        // Lesson Title
         JPanel titlePanel = new JPanel();
         titlePanel.add(new JLabel("Title:"));
         JTextField titleField = new JTextField(lesson.getTitle(), 20);
         titlePanel.add(titleField);
         dialog.add(titlePanel);
 
-        // Lesson Content
         JPanel contentPanel = new JPanel(new BorderLayout());
         contentPanel.add(new JLabel("Content:"), BorderLayout.NORTH);
         JTextArea contentArea = new JTextArea(lesson.getContent(), 5, 20);
@@ -705,7 +726,6 @@ public class InstructorDashboardFrame extends JFrame {
         contentPanel.add(scrollPane, BorderLayout.CENTER);
         dialog.add(contentPanel);
 
-        // Buttons
         JPanel btnPanel = new JPanel();
         JButton saveBtn = new JButton("Save Changes");
         JButton cancelBtn = new JButton("Cancel");
@@ -713,17 +733,14 @@ public class InstructorDashboardFrame extends JFrame {
         btnPanel.add(cancelBtn);
         dialog.add(btnPanel);
 
-        // Save button action
         saveBtn.addActionListener(e -> {
             String newTitle = titleField.getText().trim();
             String newContent = contentArea.getText().trim();
-
             String err = Validation.validateLesson(newTitle, newContent);
             if (!err.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, err, "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-
             try {
                 boolean success = instructorService.updateLesson(
                         currentUser.getUserId(),
@@ -761,7 +778,6 @@ public class InstructorDashboardFrame extends JFrame {
     // ==================== View Enrolled Students ====================
     private void showViewStudentsDialog() {
         try {
-            // Load instructor's courses
             List<Course> allCourses = dbManager.loadCourses();
             List<Course> instructorCourses = allCourses.stream()
                     .filter(c -> c.getInstructorId().equals(currentUser.getUserId()))
@@ -775,13 +791,11 @@ public class InstructorDashboardFrame extends JFrame {
                 return;
             }
 
-            // Create dialog
             JDialog dialog = new JDialog(this, "Select Course to View Students", true);
             dialog.setSize(700, 400);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new BorderLayout());
 
-            // Create table
             String[] columns = {"Course ID", "Title", "Enrolled Students"};
             DefaultTableModel model = new DefaultTableModel(columns, 0) {
                 @Override
@@ -792,9 +806,9 @@ public class InstructorDashboardFrame extends JFrame {
 
             for (Course course : instructorCourses) {
                 model.addRow(new Object[]{
-                        course.getCourseId(),
-                        course.getTitle(),
-                        course.getStudents().size()
+                    course.getCourseId(),
+                    course.getTitle(),
+                    course.getStudents().size()
                 });
             }
 
@@ -803,7 +817,6 @@ public class InstructorDashboardFrame extends JFrame {
             JScrollPane scrollPane = new JScrollPane(table);
             dialog.add(scrollPane, BorderLayout.CENTER);
 
-            // Buttons panel
             JPanel btnPanel = new JPanel();
             JButton viewBtn = new JButton("View Students");
             JButton closeBtn = new JButton("Close");
@@ -811,7 +824,6 @@ public class InstructorDashboardFrame extends JFrame {
             btnPanel.add(closeBtn);
             dialog.add(btnPanel, BorderLayout.SOUTH);
 
-            // View Students button
             viewBtn.addActionListener(e -> {
                 int selectedRow = table.getSelectedRow();
                 if (selectedRow == -1) {
@@ -823,7 +835,6 @@ public class InstructorDashboardFrame extends JFrame {
                 }
                 String courseId = (String) model.getValueAt(selectedRow, 0);
                 String courseTitle = (String) model.getValueAt(selectedRow, 1);
-
                 dialog.dispose();
                 showCourseStudentsDialog(courseId, courseTitle);
             });
@@ -841,8 +852,7 @@ public class InstructorDashboardFrame extends JFrame {
     // ==================== Show Course Students ====================
     private void showCourseStudentsDialog(String courseId, String courseTitle) {
         try {
-            List<Student> students = instructorService.getEnrolledStudents(
-                    currentUser.getUserId(), courseId);
+            List<Student> students = instructorService.getEnrolledStudents(currentUser.getUserId(), courseId);
             if (students.isEmpty()) {
                 JOptionPane.showMessageDialog(this,
                         "No students enrolled in this course yet.",
@@ -851,31 +861,27 @@ public class InstructorDashboardFrame extends JFrame {
                 return;
             }
 
-            // Create dialog
             JDialog dialog = new JDialog(this, "Students - " + courseTitle, true);
-            dialog.setSize(800, 500); // Updated size for new column
+            dialog.setSize(800, 500);
             dialog.setLocationRelativeTo(this);
             dialog.setLayout(new BorderLayout());
 
-            // Create table
-            String[] columns = {"Student ID", "Username", "Email", "Enrolled Courses", "Completed Lessons"}; // Added new column
+            String[] columns = {"Student ID", "Username", "Email", "Enrolled Courses", "Completed Lessons"};
             DefaultTableModel model = new DefaultTableModel(columns, 0) {
                 @Override
                 public boolean isCellEditable(int row, int column) {
                     return false;
                 }
             };
+
             List<Course> allCourses = dbManager.loadCourses();
             Optional<Course> courseOpt = allCourses.stream()
                     .filter(c -> c.getCourseId().equals(courseId))
                     .findFirst();
-            int totalLessonsInCourse = 0;
-            if (courseOpt.isPresent()) {
-                totalLessonsInCourse = courseOpt.get().getLessons().size();
-            }
+
+            int totalLessonsInCourse = courseOpt.map(c -> c.getLessons().size()).orElse(0);
 
             for (Student student : students) {
-                // Calculate the number of lessons completed by this student in the current course (courseId)
                 int completedLessonsCount = 0;
                 Map<String, List<String>> studentProgress = student.getProgress();
                 if (studentProgress != null && studentProgress.containsKey(courseId)) {
@@ -885,26 +891,25 @@ public class InstructorDashboardFrame extends JFrame {
                     }
                 }
 
-                // Determine course completion status for this student
                 String completedLessonsText = completedLessonsCount + " / " + totalLessonsInCourse;
                 if (totalLessonsInCourse > 0 && completedLessonsCount == totalLessonsInCourse) {
                     completedLessonsText += " (COMPLETED!)";
                 }
 
                 model.addRow(new Object[]{
-                        student.getUserId(),
-                        student.getUsername(),
-                        student.getEmail(),
-                        student.getEnrolledCourses().size(),
-                        completedLessonsText // Populate the new column with count and status
+                    student.getUserId(),
+                    student.getUsername(),
+                    student.getEmail(),
+                    student.getEnrolledCourses().size(),
+                    completedLessonsText
                 });
             }
+
             JTable table = new JTable(model);
             table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
             JScrollPane scrollPane = new JScrollPane(table);
             dialog.add(scrollPane, BorderLayout.CENTER);
 
-            // Close button
             JPanel btnPanel = new JPanel();
             JButton closeBtn = new JButton("Close");
             btnPanel.add(closeBtn);
@@ -914,6 +919,7 @@ public class InstructorDashboardFrame extends JFrame {
                 dialog.dispose();
                 showViewStudentsDialog();
             });
+
             dialog.setVisible(true);
         } catch (IOException ex) {
             JOptionPane.showMessageDialog(this,
@@ -924,7 +930,7 @@ public class InstructorDashboardFrame extends JFrame {
     }
 
     // Constructor with no arguments (for compatibility)
-        public InstructorDashboardFrame() {
+    public InstructorDashboardFrame() {
         this(new Instructor());
     }
 
@@ -933,14 +939,14 @@ public class InstructorDashboardFrame extends JFrame {
         try {
             int[] stats = userService.getInstructorStatistics(currentUser.getUserId());
             String message = String.format(
-                    "=== My Profile ===\n" +
-                    "User ID: %s\n" +
-                    "Username: %s\n" +
-                    "Email: %s\n" +
-                    "Role: %s\n" +
-                    "=== My Statistics ===\n" +
-                    "Created Courses: %d\n" +
-                    "Total Students: %d\n",
+                    "=== My Profile ===\n"
+                    + "User ID: %s\n"
+                    + "Username: %s\n"
+                    + "Email: %s\n"
+                    + "Role: %s\n"
+                    + "=== My Statistics ===\n"
+                    + "Created Courses: %d\n"
+                    + "Total Students: %d\n",
                     currentUser.getUserId(),
                     currentUser.getUsername(),
                     currentUser.getEmail(),
@@ -948,6 +954,7 @@ public class InstructorDashboardFrame extends JFrame {
                     stats[0],
                     stats[1]
             );
+
             String[] options = {"Edit Profile", "Change Password", "Close"};
             int choice = JOptionPane.showOptionDialog(this,
                     message,
@@ -957,6 +964,7 @@ public class InstructorDashboardFrame extends JFrame {
                     null,
                     options,
                     options[2]);
+
             if (choice == 0) {
                 showEditProfileDialog();
             } else if (choice == 1) {
@@ -975,12 +983,16 @@ public class InstructorDashboardFrame extends JFrame {
         String newUsername = JOptionPane.showInputDialog(this,
                 "Enter new username:",
                 currentUser.getUsername());
-        if (newUsername == null) return;
+        if (newUsername == null) {
+            return;
+        }
+
         String newEmail = JOptionPane.showInputDialog(this,
                 "Enter new email:",
                 currentUser.getEmail());
-        if (newEmail == null) return;
-
+        if (newEmail == null) {
+            return;
+        }
 
         String err = Validation.validateUsername(newUsername.trim());
         if (!err.isEmpty()) {
@@ -1003,7 +1015,7 @@ public class InstructorDashboardFrame extends JFrame {
             if (success) {
                 currentUser.setUsername(newUsername.trim());
                 currentUser.setEmail(newEmail.trim());
-                setTitle("Student Dashboard - " + newUsername.trim());
+                setTitle("Instructor Dashboard - " + newUsername.trim());
                 JOptionPane.showMessageDialog(this,
                         "Profile updated successfully!",
                         "Success",
@@ -1021,20 +1033,24 @@ public class InstructorDashboardFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private void showChangePasswordDialog() {
         UserService userService = new UserService(dbManager);
         String oldPassword = JOptionPane.showInputDialog(this, "Enter old password:");
         if (oldPassword == null || oldPassword.isEmpty()) {
             return;
         }
+
         String newPassword = JOptionPane.showInputDialog(this, "Enter new password:");
         if (newPassword == null || newPassword.isEmpty()) {
             return;
         }
+
         String confirmPassword = JOptionPane.showInputDialog(this, "Confirm new password:");
         if (confirmPassword == null || confirmPassword.isEmpty()) {
             return;
         }
+
         String err = Validation.validatePassword(newPassword);
         if (!err.isEmpty()) {
             JOptionPane.showMessageDialog(this, err, "Error", JOptionPane.ERROR_MESSAGE);
@@ -1046,6 +1062,7 @@ public class InstructorDashboardFrame extends JFrame {
             JOptionPane.showMessageDialog(this, err, "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         try {
             boolean success = userService.updateUserPassword(
                     currentUser.getUserId(),

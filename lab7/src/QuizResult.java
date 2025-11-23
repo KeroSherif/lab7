@@ -1,17 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-
-/**
- *
- * @author DANAH
- */
 public class QuizResult {
     private String studentId;
     private String courseId;
     private String lessonId;
     private int score;
+
+    // Empty constructor for Jackson
+    public QuizResult() {
+    }
 
     public QuizResult(String studentId, String courseId, String lessonId, int score) {
         this.studentId = studentId;
@@ -20,8 +15,16 @@ public class QuizResult {
         this.score = score;
     }
 
+    // Getters and Setters
     public String getStudentId() { return studentId; }
+    public void setStudentId(String studentId) { this.studentId = studentId; }
+    
     public String getCourseId() { return courseId; }
+    public void setCourseId(String courseId) { this.courseId = courseId; }
+    
     public String getLessonId() { return lessonId; }
+    public void setLessonId(String lessonId) { this.lessonId = lessonId; }
+    
     public int getScore() { return score; }
+    public void setScore(int score) { this.score = score; }
 }

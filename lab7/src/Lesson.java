@@ -17,10 +17,12 @@ public class Lesson {
     private String title;
     private String content;
     private List<String> resources; // ممكن تكون فاضية (List of URLs or file paths)
+    private List<Question> questions;
 
     // Constructor فاضي لـ Jackson
     public Lesson() {
         this.resources = new ArrayList<>();
+        this.questions = new ArrayList<>();
     }
 
     // Constructor مع باراميترز
@@ -32,6 +34,17 @@ public class Lesson {
     }
 
     // Getters و Setters
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
+    }
+    
+    public void addQuestion(Question q) {
+        this.questions.add(q);
+    }
     public String getLessonId() {
         return lessonId;
     }

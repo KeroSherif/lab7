@@ -101,4 +101,4 @@ public class Course {
     public boolean removeLesson(String lessonId) {
         return this.lessons.removeIf(lesson -> lesson.getLessonId().equals(lessonId));
     }
-}
+

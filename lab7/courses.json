@@ -1,0 +1,30 @@
+[ {
+  "courseId" : "703",
+  "title" : "Linear Algebra",
+  "description" : "Linear Algebra is a fundamental mathematics course that focuses on the study of vectors, vector spaces, and linear transformations.",
+  "instructorId" : "U2",
+  "lessons" : [ {
+    "lessonId" : "101",
+    "title" : "intro",
+    "content" : "intro about matrix",
+    "resources" : [ ]
+  }, {
+    "lessonId" : "102",
+    "title" : "chapter1",
+    "content" : "how to calc the determnent",
+    "resources" : [ ]
+  } ],
+  "students" : [ "U1" ]
+}, {
+  "courseId" : "704",
+  "title" : "D.E",
+  "description" : "Math4",
+  "instructorId" : "U2",
+  "lessons" : [ {
+    "lessonId" : "101",
+    "title" : "INTRODUCTION",
+    "content" : "INTRO ABOUT D.E",
+    "resources" : [ ]
+  } ],
+  "students" : [ "U1" ]
+} ]

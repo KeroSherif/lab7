@@ -74,6 +74,4 @@ public class Lesson {
     public void removeResource(String resource) {
         this.resources.remove(resource);
     }
-    
-
 }

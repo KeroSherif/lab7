@@ -7,14 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 public class JsonDatabaseManager {
 
     private static final String USERS_FILE = "users.json";
     private static final String COURSES_FILE = "courses.json";
     private ObjectMapper mapper;
     private static JsonDatabaseManager instance = null;
-    private static final String QUIZ_RESULTS_FILE = "quiz_results.json";
 
     private JsonDatabaseManager() {
         // إنشاء ObjectMapper بشكل بسيط
@@ -26,8 +24,6 @@ public class JsonDatabaseManager {
         // تأكد من وجود الملفات
         initializeFile(USERS_FILE, new ArrayList<User>());
         initializeFile(COURSES_FILE, new ArrayList<Course>());
-        initializeFile(QUIZ_RESULTS_FILE, new ArrayList<QuizResult>());
-
     }
 
     public static JsonDatabaseManager getInstance() {
@@ -186,42 +182,28 @@ public class JsonDatabaseManager {
         Optional<Course> existingCourse = findCourseById(courseId);
         return existingCourse.isPresent();
     }
+    public static void saveCertificate(Map<String, String> certificate) {
+    try {
+        JSONArray arr = readJsonArray("certificates.json");
+        arr.put(new JSONObject(certificate));
+        writeJsonArray("certificates.json", arr);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    public static void saveStudent(Student student) {
+    JSONArray students = readJsonArray("students.json");
 
-public List<QuizResult> loadQuizResults() throws IOException {
-    File file = new File(QUIZ_RESULTS_FILE);
-
-    if (!file.exists() || file.length() == 0) {
-        return new ArrayList<>();
+    for (int i = 0; i < students.length(); i++) {
+        JSONObject obj = students.getJSONObject(i);
+        if (obj.getString("id").equals(student.getId())) {
+            students.put(i, student.toJson());
+            break;
+        }
     }
 
-    return mapper.readValue(file, new TypeReference<List<QuizResult>>() {});
-}
+    writeJsonArray("students.json", students);
+    }
 
-public void saveQuizResults(List<QuizResult> results) throws IOException {
-    mapper.writerWithDefaultPrettyPrinter().writeValue(new File(QUIZ_RESULTS_FILE), results);
 }
-
-public void saveQuizResult(QuizResult result) throws IOException {
-    List<QuizResult> list = loadQuizResults();
-    list.add(result);
-    saveQuizResults(list);
-}
-
-public List<QuizResult> getQuizResultsForLesson(String lessonId) throws IOException {
-    return loadQuizResults()
-            .stream()
-            .filter(r -> r.getLessonId().equals(lessonId))
-            .collect(java.util.stream.Collectors.toList());
-}
-
-public List<QuizResult> getQuizResultsForCourse(String courseId) throws IOException {
-    return loadQuizResults()
-            .stream()
-            .filter(r -> r.getCourseId().equals(courseId))
-            .collect(java.util.stream.Collectors.toList());
-}
-
-    
-   
 
 }

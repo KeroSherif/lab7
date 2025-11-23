@@ -254,5 +254,23 @@ public class StudentService {
     }
     return true;
     }
+    public Map<String, String> generateCertificate(Student student, String courseId) {
+    Map<String, String> cert = new HashMap<>();
+
+    String certId = "CERT-" + UUID.randomUUID().toString().substring(0, 8);
+
+    cert.put("certificateId", certId);
+    cert.put("studentId", student.getId());
+    cert.put("courseId", courseId);
+    cert.put("issueDate", LocalDate.now().toString());
+
+    student.addCertificate(cert);
+    JsonDatabaseManager.saveStudent(student);
+
+    JsonDatabaseManager.saveCertificate(cert);
+
+    return cert;
+}
+
 
 }

@@ -2,6 +2,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -51,6 +52,66 @@ public class InstructorDashboardFrame extends JFrame {
         new LoginFrame().setVisible(true);
         });
     }
+    //===================== show Quiz Dialog =====================
+
+    private List<Question> showManageQuizDialog(JDialog parent, List<Question> existingQuestions) {
+    // Use existing list or create new
+    List<Question> tempQuestions = (existingQuestions != null) ? new ArrayList<>(existingQuestions) : new ArrayList<>();
+    
+    JDialog dialog = new JDialog(parent, "Manage Quiz", true);
+    dialog.setSize(600, 500);
+    dialog.setLayout(new BorderLayout());
+    
+    DefaultTableModel model = new DefaultTableModel(new String[]{"Question", "Correct Answer"}, 0);
+    for(Question q : tempQuestions) {
+        model.addRow(new Object[]{q.getQuestionText(), q.getOptions().get(q.getCorrectOptionIndex())});
+    }
+    JTable table = new JTable(model);
+    dialog.add(new JScrollPane(table), BorderLayout.CENTER);
+    
+    JPanel inputPanel = new JPanel(new GridLayout(6, 2));
+    JTextField qField = new JTextField();
+    JTextField opt1 = new JTextField();
+    JTextField opt2 = new JTextField();
+    JTextField opt3 = new JTextField();
+    JTextField opt4 = new JTextField();
+    JComboBox<String> correctBox = new JComboBox<>(new String[]{"Option 1", "Option 2", "Option 3", "Option 4"});
+    
+    inputPanel.add(new JLabel("Question:")); inputPanel.add(qField);
+    inputPanel.add(new JLabel("Option 1:")); inputPanel.add(opt1);
+    inputPanel.add(new JLabel("Option 2:")); inputPanel.add(opt2);
+    inputPanel.add(new JLabel("Option 3:")); inputPanel.add(opt3);
+    inputPanel.add(new JLabel("Option 4:")); inputPanel.add(opt4);
+    inputPanel.add(new JLabel("Correct One:")); inputPanel.add(correctBox);
+    
+    dialog.add(inputPanel, BorderLayout.NORTH);
+    
+    JPanel btnPanel = new JPanel();
+    JButton addBtn = new JButton("Add Question");
+    JButton saveBtn = new JButton("Save Quiz");
+    
+    addBtn.addActionListener(e -> {
+        List<String> opts = new ArrayList<>();
+        opts.add(opt1.getText()); opts.add(opt2.getText()); 
+        opts.add(opt3.getText()); opts.add(opt4.getText());
+        
+        Question q = new Question(qField.getText(), opts, correctBox.getSelectedIndex());
+        tempQuestions.add(q);
+        model.addRow(new Object[]{q.getQuestionText(), opts.get(q.getCorrectOptionIndex())});
+        
+        // Clear fields
+        qField.setText(""); opt1.setText(""); opt2.setText(""); opt3.setText(""); opt4.setText("");
+    });
+    
+    saveBtn.addActionListener(e -> dialog.dispose());
+    
+    btnPanel.add(addBtn);
+    btnPanel.add(saveBtn);
+    dialog.add(btnPanel, BorderLayout.SOUTH);
+    
+    dialog.setVisible(true);
+    return tempQuestions;
+}
 
     // ==================== Create Course ====================
     private void showCreateCourseDialog() {
@@ -516,6 +577,15 @@ public class InstructorDashboardFrame extends JFrame {
     // ==================== Add Lesson ====================
     private void showAddLessonDialog(String courseId, JDialog parentDialog) {
         JDialog dialog = new JDialog(this, "Add New Lesson", true);
+        List<Question> currentQuiz = new ArrayList<>(); 
+        JButton manageQuizBtn = new JButton("Attach Quiz");
+        manageQuizBtn.addActionListener(e -> {
+        // Update the list with the result from the dialog
+        List<Question> updated = showManageQuizDialog(dialog, currentQuiz);
+        currentQuiz.clear();
+        currentQuiz.addAll(updated);
+        JOptionPane.showMessageDialog(dialog, "Quiz now has " + currentQuiz.size() + " questions.");
+        });
         dialog.setSize(500, 450);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new GridLayout(5, 1, 10, 10));
@@ -548,6 +618,7 @@ public class InstructorDashboardFrame extends JFrame {
         JPanel btnPanel = new JPanel();
         JButton addBtn = new JButton("Add");
         JButton cancelBtn = new JButton("Cancel");
+        btnPanel.add(manageQuizBtn);
         btnPanel.add(addBtn);
         btnPanel.add(cancelBtn);
         dialog.add(btnPanel);
@@ -571,6 +642,7 @@ public class InstructorDashboardFrame extends JFrame {
             }
 
             Lesson newLesson = new Lesson(lessonId, title, content);
+            newLesson.setQuestions(currentQuiz);
 
             try {
                 boolean success = instructorService.addLessonToCourse(

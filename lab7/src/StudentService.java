@@ -246,4 +246,13 @@ public class StudentService {
         System.out.println("StudentService: Found " + completedCourseIds.size() + " completed courses for student " + studentId);
         return completedCourseIds;
     }
+    public boolean isCourseCompleted(Student student, List<Lesson> lessons) {
+    for (Lesson lesson : lessons) {
+        if (!student.getPassedQuizzes().contains(lesson.getQuizId())) {
+            return false;
+        }
+    }
+    return true;
+    }
+
 }

@@ -1,20 +1,15 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 /**
+ * Service class for managing users (Students and Instructors) Provides methods
+ * for user CRUD operations
  *
- * @author Kirolos sherif
- */
-
-
-/**
- * Service class for managing users (Students and Instructors)
- * Provides methods for user CRUD operations
+ * @author Kirolos Sherif
  */
 public class UserService {
 
@@ -25,157 +20,110 @@ public class UserService {
     }
 
     // ==================== Get All Users ====================
-    
-    /**
-     * Gets all users in the system
-     */
     public List<User> getAllUsers() throws IOException {
         return dbManager.loadUsers();
     }
 
-    /**
-     * Gets all students in the system
-     */
     public List<Student> getAllStudents() throws IOException {
-        List<User> allUsers = dbManager.loadUsers();
-        return allUsers.stream()
+        return getAllUsers().stream()
                 .filter(u -> u instanceof Student)
                 .map(u -> (Student) u)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Gets all instructors in the system
-     */
     public List<Instructor> getAllInstructors() throws IOException {
-        List<User> allUsers = dbManager.loadUsers();
-        return allUsers.stream()
+        return getAllUsers().stream()
                 .filter(u -> u instanceof Instructor)
                 .map(u -> (Instructor) u)
                 .collect(Collectors.toList());
     }
 
     // ==================== Get User by ID ====================
-
-    /**
-     * Gets a user by their ID
-     */
     public User getUserById(String userId) throws IOException {
-        Optional<User> userOpt = dbManager.findUserById(userId);
-        return userOpt.orElse(null);
+        return dbManager.findUserById(userId).orElse(null);
     }
 
-    /**
-     * Gets a student by their ID
-     */
     public Student getStudentById(String studentId) throws IOException {
         return dbManager.getStudentById(studentId);
     }
 
-    /**
-     * Gets an instructor by their ID
-     */
     public Instructor getInstructorById(String instructorId) throws IOException {
         return dbManager.getInstructorById(instructorId);
     }
 
     // ==================== Get User by Email ====================
-
-    /**
-     * Gets a user by their email
-     */
     public User getUserByEmail(String email) throws IOException {
         return dbManager.getUserByEmail(email);
     }
 
     // ==================== Update User ====================
-
-    /**
-     * Updates a user's information (username, email)
-     * Password cannot be changed through this method
-     */
     public boolean updateUser(String userId, String newUsername, String newEmail) throws IOException {
-        
         String validationErrorUsername = Validation.validateUsername(newUsername);
         if (!validationErrorUsername.isEmpty()) {
             System.out.println("UserService: " + validationErrorUsername);
             return false;
         }
-        
+
         String validationErrorEmail = Validation.validateEmail(newEmail);
         if (!validationErrorEmail.isEmpty()) {
             System.out.println("UserService: " + validationErrorEmail);
             return false;
         }
+
         List<User> allUsers = dbManager.loadUsers();
-
-        Optional<User> userOpt = allUsers.stream()
+        User user = allUsers.stream()
                 .filter(u -> u.getUserId().equals(userId))
-                .findFirst();
+                .findFirst()
+                .orElse(null);
 
-        if (userOpt.isEmpty()) {
+        if (user == null) {
             System.out.println("UserService: User with ID " + userId + " not found.");
             return false;
         }
 
-        User user = userOpt.get();
+        // Check email uniqueness (excluding current user)
+        boolean emailExists = allUsers.stream()
+                .anyMatch(u -> !u.getUserId().equals(userId) && newEmail.equals(u.getEmail()));
 
-        // Check if new email is already taken by another user
-        if (!user.getEmail().equals(newEmail)) {
-            boolean emailExists = allUsers.stream()
-                    .anyMatch(u -> !u.getUserId().equals(userId) && u.getEmail().equals(newEmail));
-            
-            if (emailExists) {
-                System.out.println("UserService: Email " + newEmail + " is already taken.");
-                return false;
-            }
+        if (emailExists) {
+            System.out.println("UserService: Email " + newEmail + " is already taken.");
+            return false;
         }
 
         user.setUsername(newUsername);
         user.setEmail(newEmail);
 
         dbManager.saveUsers(allUsers);
-
         System.out.println("UserService: User " + userId + " updated successfully.");
         return true;
     }
 
-    /**
-     * Updates a user's password
-     */
     public boolean updateUserPassword(String userId, String oldPassword, String newPassword) throws IOException {
-       String validationError = Validation.validatePassword(newPassword);
+        String validationError = Validation.validatePassword(newPassword);
         if (!validationError.isEmpty()) {
             System.out.println("UserService: " + validationError);
             return false;
         }
+
         List<User> allUsers = dbManager.loadUsers();
-
-        Optional<User> userOpt = allUsers.stream()
+        User user = allUsers.stream()
                 .filter(u -> u.getUserId().equals(userId))
-                .findFirst();
+                .findFirst()
+                .orElse(null);
 
-        if (userOpt.isEmpty()) {
+        if (user == null) {
             System.out.println("UserService: User with ID " + userId + " not found.");
             return false;
         }
 
-        User user = userOpt.get();
-
-        // Verify old password
         try {
-            String oldPasswordHash = PasswordEncryption.hashPassword(oldPassword);
-            if (!oldPasswordHash.equals(user.getPasswordHash())) {
+            if (!PasswordEncryption.hashPassword(oldPassword).equals(user.getPasswordHash())) {
                 System.out.println("UserService: Old password is incorrect.");
                 return false;
             }
 
-            // Set new password
-            String newPasswordHash = PasswordEncryption.hashPassword(newPassword);
-            user.setPasswordHash(newPasswordHash);
-
+            user.setPasswordHash(PasswordEncryption.hashPassword(newPassword));
             dbManager.saveUsers(allUsers);
-
             System.out.println("UserService: Password for user " + userId + " updated successfully.");
             return true;
 
@@ -186,68 +134,49 @@ public class UserService {
     }
 
     // ==================== Delete User ====================
-
-    /**
-     * Deletes a user from the system
-     * Also removes them from all enrolled courses (if student)
-     * Or removes all their created courses (if instructor)
-     */
     public boolean deleteUser(String userId) throws IOException {
-        List<User> allUsers = dbManager.loadUsers();
-        List<Course> allCourses = dbManager.loadCourses();
-
-        Optional<User> userOpt = allUsers.stream()
-                .filter(u -> u.getUserId().equals(userId))
-                .findFirst();
-
-        if (userOpt.isEmpty()) {
+        User user = getUserById(userId);
+        if (user == null) {
             System.out.println("UserService: User with ID " + userId + " not found.");
             return false;
         }
 
-        User user = userOpt.get();
+        List<Course> allCourses = dbManager.loadCourses();
 
-        // If Student: remove from all enrolled courses
         if (user instanceof Student) {
             Student student = (Student) user;
-            List<String> enrolledCourses = student.getEnrolledCourses();
-
-            for (String courseId : enrolledCourses) {
+            for (String courseId : new ArrayList<>(student.getEnrolledCourses())) {
                 Optional<Course> courseOpt = allCourses.stream()
                         .filter(c -> c.getCourseId().equals(courseId))
                         .findFirst();
-
                 if (courseOpt.isPresent()) {
-                    Course course = courseOpt.get();
-                    course.removeStudent(userId);
+                    courseOpt.get().removeStudent(userId);
                 }
             }
         }
 
-        // If Instructor: delete all their courses
         if (user instanceof Instructor) {
             Instructor instructor = (Instructor) user;
-            List<String> createdCourses = instructor.getCreatedCourses();
+            List<String> createdCourses = new ArrayList<>(instructor.getCreatedCourses());
 
-            // Remove all courses created by this instructor
+            // Remove courses
             allCourses.removeIf(c -> createdCourses.contains(c.getCourseId()));
 
-            // Also unenroll students from deleted courses
+            // Remove these courses from students' progress & enrollment
+            List<User> allUsers = dbManager.loadUsers();
             for (User u : allUsers) {
                 if (u instanceof Student) {
                     Student s = (Student) u;
                     s.getEnrolledCourses().removeAll(createdCourses);
-                    for (String courseId : createdCourses) {
-                        s.getProgress().remove(courseId);
-                    }
+                    createdCourses.forEach(s.getProgress()::remove);
                 }
             }
+            dbManager.saveUsers(allUsers);
         }
 
-        // Remove user
-        allUsers.remove(user);
-
-        // Save changes
+        // Remove user and save
+        List<User> allUsers = dbManager.loadUsers();
+        allUsers.removeIf(u -> u.getUserId().equals(userId));
         dbManager.saveUsers(allUsers);
         dbManager.saveCourses(allCourses);
 
@@ -256,170 +185,139 @@ public class UserService {
     }
 
     // ==================== User Statistics ====================
-
-    /**
-     * Gets the total number of users
-     */
     public int getTotalUsersCount() throws IOException {
-        return dbManager.loadUsers().size();
+        return getAllUsers().size();
     }
 
-    /**
-     * Gets the total number of students
-     */
     public int getTotalStudentsCount() throws IOException {
         return getAllStudents().size();
     }
 
-    /**
-     * Gets the total number of instructors
-     */
     public int getTotalInstructorsCount() throws IOException {
         return getAllInstructors().size();
     }
 
-    /**
-     * Gets detailed statistics for a student
-     * Returns: [total enrolled courses, total completed lessons]
-     */
     public int[] getStudentStatistics(String studentId) throws IOException {
         Student student = getStudentById(studentId);
-        
         if (student == null) {
             return new int[]{0, 0};
         }
 
-        int enrolledCoursesCount = student.getEnrolledCourses().size();
-        
-        int completedLessonsCount = 0;
-        for (List<String> completedLessons : student.getProgress().values()) {
-            completedLessonsCount += completedLessons.size();
-        }
+        int enrolled = student.getEnrolledCourses().size();
+        int completed = student.getProgress().values().stream()
+                .mapToInt(List::size)
+                .sum();
 
-        return new int[]{enrolledCoursesCount, completedLessonsCount};
+        return new int[]{enrolled, completed};
     }
 
-    /**
-     * Gets detailed statistics for an instructor
-     * Returns: [total created courses, total enrolled students across all courses]
-     */
     public int[] getInstructorStatistics(String instructorId) throws IOException {
         Instructor instructor = getInstructorById(instructorId);
-        List<Course> allCourses = dbManager.loadCourses();
-
         if (instructor == null) {
             return new int[]{0, 0};
         }
 
-        List<String> createdCourses = instructor.getCreatedCourses();
-        int createdCoursesCount = createdCourses.size();
+        List<Course> allCourses = dbManager.loadCourses();
+        List<String> created = instructor.getCreatedCourses();
 
-        int totalStudents = 0;
-        for (Course course : allCourses) {
-            if (createdCourses.contains(course.getCourseId())) {
-                totalStudents += course.getStudents().size();
-            }
-        }
+        int courseCount = (int) created.stream()
+                .filter(id -> allCourses.stream().anyMatch(c -> c.getCourseId().equals(id)))
+                .count();
 
-        return new int[]{createdCoursesCount, totalStudents};
+        int studentCount = allCourses.stream()
+                .filter(c -> created.contains(c.getCourseId()))
+                .mapToInt(c -> c.getStudents().size())
+                .sum();
+
+        return new int[]{courseCount, studentCount};
     }
 
-    // ==================== Validation Methods ====================
-
-    /**
-     * Checks if a user ID exists
-     */
+    // ==================== Validation & Search ====================
     public boolean userExists(String userId) throws IOException {
         return dbManager.findUserById(userId).isPresent();
     }
 
-    /**
-     * Checks if an email is already registered
-     */
     public boolean emailExists(String email) throws IOException {
         return dbManager.getUserByEmail(email) != null;
     }
 
-    /**
-     * Validates email format
-     */
     public boolean isValidEmail(String email) {
         return email != null && email.contains("@") && email.contains(".");
     }
 
-    /**
-     * Validates password strength
-     * Password must be at least 6 characters
-     */
     public boolean isValidPassword(String password) {
         return password != null && password.length() >= 6;
     }
 
-    // ==================== Search Methods ====================
-
-    /**
-     * Searches for users by username (case-insensitive)
-     */
     public List<User> searchUsersByUsername(String username) throws IOException {
-        List<User> allUsers = dbManager.loadUsers();
-        String searchTerm = username.toLowerCase();
-        
-        return allUsers.stream()
-                .filter(u -> u.getUsername().toLowerCase().contains(searchTerm))
+        String term = username.toLowerCase();
+        return getAllUsers().stream()
+                .filter(u -> u.getUsername().toLowerCase().contains(term))
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Searches for users by email (case-insensitive)
-     */
     public List<User> searchUsersByEmail(String email) throws IOException {
-        List<User> allUsers = dbManager.loadUsers();
-        String searchTerm = email.toLowerCase();
-        
-        return allUsers.stream()
-                .filter(u -> u.getEmail().toLowerCase().contains(searchTerm))
+        String term = email.toLowerCase();
+        return getAllUsers().stream()
+                .filter(u -> u.getEmail() != null && u.getEmail().toLowerCase().contains(term))
                 .collect(Collectors.toList());
     }
 
     // ==================== Bulk Operations ====================
-
-    /**
-     * Deletes all users (DANGEROUS - use with caution)
-     */
     public boolean deleteAllUsers() throws IOException {
-        List<Course> allCourses = dbManager.loadCourses();
-        
-        // Clear all students from all courses
-        for (Course course : allCourses) {
-            course.getStudents().clear();
-        }
-        
-        // Delete all courses (since instructors are being deleted)
-        allCourses.clear();
-        
-        dbManager.saveUsers(new java.util.ArrayList<>());
-        dbManager.saveCourses(allCourses);
-        
-        System.out.println("UserService: All users deleted.");
+        dbManager.saveUsers(new ArrayList<>());
+        dbManager.saveCourses(new ArrayList<>());
+        System.out.println("UserService: All users and courses deleted.");
         return true;
     }
 
-    /**
-     * Gets users by role
-     */
-    public List<User> getUsersByRole(String role) throws IOException {
-        List<User> allUsers = dbManager.loadUsers();
-        
-        if ("student".equalsIgnoreCase(role)) {
-            return allUsers.stream()
-                    .filter(u -> u instanceof Student)
-                    .collect(Collectors.toList());
-        } else if ("instructor".equalsIgnoreCase(role)) {
-            return allUsers.stream()
-                    .filter(u -> u instanceof Instructor)
-                    .collect(Collectors.toList());
+    // ==================== Progress Calculation ====================
+    public double getAverageProgressForCourse(String courseId) throws IOException {
+        List<Course> allCourses = dbManager.loadCourses();
+        Course course = allCourses.stream()
+                .filter(c -> c.getCourseId().equals(courseId))
+                .findFirst()
+                .orElse(null);
+
+        if (course == null) {
+            return 0.0;
         }
-        
-        return new java.util.ArrayList<>();
+
+        int totalLessons = course.getLessons().size();
+        List<String> studentIds = course.getStudents();
+        int totalStudents = studentIds.size();
+
+        if (totalLessons == 0 || totalStudents == 0) {
+            return 0.0;
+        }
+
+        List<User> allUsers = dbManager.loadUsers();
+        int totalCompleted = 0;
+
+        for (String studentId : studentIds) {
+            Student student = allUsers.stream()
+                    .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
+                    .map(u -> (Student) u)
+                    .findFirst()
+                    .orElse(null);
+
+            if (student != null) {
+                List<String> completed = student.getProgress().getOrDefault(courseId, new ArrayList<>());
+                totalCompleted += completed.size();
+            }
+        }
+
+        double totalPossible = totalLessons * totalStudents;
+        return (totalPossible > 0) ? ((double) totalCompleted / totalPossible) * 100.0 : 0.0;
+    }
+
+    // ==================== Get Users by Role ====================
+    public List<User> getUsersByRole(String role) throws IOException {
+        if ("student".equalsIgnoreCase(role)) {
+            return new ArrayList<>(getAllStudents()); // تحويل لـ List<User>
+        } else if ("instructor".equalsIgnoreCase(role)) {
+            return new ArrayList<>(getAllInstructors());
+        }
+        return new ArrayList<>();
     }
 }

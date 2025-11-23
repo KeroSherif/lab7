@@ -1,8 +1,6 @@
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StudentService {
@@ -12,14 +10,12 @@ public class StudentService {
         this.db = db;
     }
 
-    
     public List<Course> getAllCourses() throws IOException {
-      return db.loadCourses().stream()
-            .filter(course -> course.getApprovalStatus() == Course.ApprovalStatus.APPROVED)
-            .toList();
+        return db.loadCourses().stream()
+                .filter(course -> course.getApprovalStatus() == Course.ApprovalStatus.APPROVED)
+                .toList();
     }
 
-    
     public boolean enrollStudent(String studentId, String courseId) throws IOException {
         String err = Validation.validateUserId(studentId);
         if (!err.isEmpty()) {
@@ -31,8 +27,10 @@ public class StudentService {
             System.out.println("StudentService: " + err);
             return false;
         }
+
         List<User> allUsers = db.loadUsers();
         List<Course> allCourses = db.loadCourses();
+
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
@@ -62,9 +60,8 @@ public class StudentService {
         return true;
     }
 
-   
     public boolean completeLesson(String studentId, String courseId, String lessonId) throws IOException {
-       String err = Validation.validateUserId(studentId);
+        String err = Validation.validateUserId(studentId);
         if (!err.isEmpty()) {
             System.out.println("StudentService: " + err);
             return false;
@@ -79,7 +76,7 @@ public class StudentService {
             System.out.println("StudentService: " + err);
             return false;
         }
-        
+
         List<User> allUsers = db.loadUsers();
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
@@ -91,24 +88,21 @@ public class StudentService {
         }
 
         Student s = (Student) studentOpt.get();
-
-    
         if (!s.getEnrolledCourses().contains(courseId)) {
-             System.out.println("StudentService: Student " + studentId + " is not enrolled in course " + courseId);
-             return false; 
+            System.out.println("StudentService: Student " + studentId + " is not enrolled in course " + courseId);
+            return false;
         }
 
-        
         s.markLessonCompleted(courseId, lessonId);
         db.saveUsers(allUsers);
         System.out.println("StudentService: Lesson " + lessonId + " marked as completed for student " + studentId + " in course " + courseId);
         return true;
     }
 
-    
     public List<Course> getEnrolledCourses(String studentId) throws IOException {
         List<User> allUsers = db.loadUsers();
         List<Course> allCourses = db.loadCourses();
+
         Optional<User> studentOpt = allUsers.stream()
                 .filter(u -> u.getUserId().equals(studentId) && u instanceof Student)
                 .findFirst();
@@ -120,7 +114,6 @@ public class StudentService {
 
         Student student = (Student) studentOpt.get();
         List<String> enrolledCourseIds = student.getEnrolledCourses();
-
         List<Course> enrolledCourses = allCourses.stream()
                 .filter(c -> enrolledCourseIds.contains(c.getCourseId()))
                 .collect(Collectors.toList());
@@ -129,7 +122,6 @@ public class StudentService {
         return enrolledCourses;
     }
 
-    
     public List<Lesson> getCourseLessons(String courseId) throws IOException {
         List<Course> allCourses = db.loadCourses();
         Optional<Course> courseOpt = allCourses.stream()
@@ -147,7 +139,6 @@ public class StudentService {
         return lessons;
     }
 
-   
     public Lesson getLessonById(String courseId, String lessonId) throws IOException {
         List<Course> allCourses = db.loadCourses();
         Optional<Course> courseOpt = allCourses.stream()
@@ -173,7 +164,6 @@ public class StudentService {
         return lessonOpt.get();
     }
 
-   
     public Map<String, List<String>> getStudentProgress(String studentId, String courseId) throws IOException {
         List<User> allUsers = db.loadUsers();
         Optional<User> studentOpt = allUsers.stream()
@@ -182,7 +172,7 @@ public class StudentService {
 
         if (studentOpt.isEmpty()) {
             System.out.println("StudentService: Student with ID " + studentId + " not found.");
-            return null; 
+            return Map.of(courseId, new ArrayList<>());
         }
 
         Student student = (Student) studentOpt.get();
@@ -190,56 +180,42 @@ public class StudentService {
 
         if (progress.containsKey(courseId)) {
             System.out.println("StudentService: Found progress for student " + studentId + " in course " + courseId);
-            return Map.of(courseId, progress.get(courseId));
+            return Map.of(courseId, new ArrayList<>(progress.get(courseId)));
         } else {
             System.out.println("StudentService: No progress found for student " + studentId + " in course " + courseId);
             return Map.of(courseId, new ArrayList<>());
         }
     }
 
-   
     public boolean isCourseCompleted(String studentId, String courseId) throws IOException {
-        // Get the course lessons
         List<Lesson> courseLessons = getCourseLessons(courseId);
         if (courseLessons.isEmpty()) {
-
             return false;
         }
 
         Map<String, List<String>> progress = getStudentProgress(studentId, courseId);
-        if (progress == null || !progress.containsKey(courseId)) {
-            return false;
-        }
+        List<String> completedLessonIds = progress.getOrDefault(courseId, new ArrayList<>());
 
-        List<String> completedLessonIds = progress.get(courseId);
-
-        java.util.Set<String> courseLessonIdsSet = courseLessons.stream()
+        Set<String> courseLessonIdsSet = courseLessons.stream()
                 .map(Lesson::getLessonId)
-                .collect(java.util.stream.Collectors.toSet());
-
-        java.util.Set<String> completedLessonIdsSet = new java.util.HashSet<>(completedLessonIds);
-        completedLessonIdsSet.retainAll(courseLessonIdsSet); 
+                .collect(Collectors.toSet());
+        Set<String> completedLessonIdsSet = new HashSet<>(completedLessonIds);
+        completedLessonIdsSet.retainAll(courseLessonIdsSet);
 
         boolean isComplete = courseLessonIdsSet.size() == completedLessonIdsSet.size();
-
         System.out.println("StudentService: Course " + courseId + " for student " + studentId + " is " + (isComplete ? "COMPLETED" : "NOT completed"));
         System.out.println(" - Total lessons in course: " + courseLessonIdsSet.size());
         System.out.println(" - Completed lessons count (valid): " + completedLessonIdsSet.size());
-
         return isComplete;
     }
 
-   
-    public String getStudentCourseCompletionStatus(String studentId, String courseId) throws 
-            IOException {
+    public String getStudentCourseCompletionStatus(String studentId, String courseId) throws IOException {
         return isCourseCompleted(studentId, courseId) ? "Complete" : "Incomplete";
     }
 
-   
     public List<String> getCompletedCourses(String studentId) throws IOException {
         List<String> completedCourseIds = new ArrayList<>();
         List<Course> allCourses = db.loadCourses();
-
         for (Course course : allCourses) {
             if (isCourseCompleted(studentId, course.getCourseId())) {
                 completedCourseIds.add(course.getCourseId());
@@ -248,31 +224,28 @@ public class StudentService {
         System.out.println("StudentService: Found " + completedCourseIds.size() + " completed courses for student " + studentId);
         return completedCourseIds;
     }
-    public boolean isCourseCompleted(Student student, List<Lesson> lessons) {
-    for (Lesson lesson : lessons) {
-        if (!student.getPassedQuizzes().contains(lesson.getQuizId())) {
-            return false;
-        }
-    }
-    return true;
-    }
+
+    // ✅ تم إزالة الدالة الزائدة: isCourseCompleted(Student, List<Lesson>)
+    // لأن النظام يعتمد على progress فقط، وليس الكويزات.
+
     public Map<String, String> generateCertificate(Student student, String courseId) {
-    Map<String, String> cert = new HashMap<>();
-
-    String certId = "CERT-" + UUID.randomUUID().toString().substring(0, 8);
-
-    cert.put("certificateId", certId);
-    cert.put("studentId", student.getId());
-    cert.put("courseId", courseId);
-    cert.put("issueDate", LocalDate.now().toString());
-
-    student.addCertificate(cert);
-    JsonDatabaseManager.saveStudent(student);
-
-    JsonDatabaseManager.saveCertificate(cert);
-
-    return cert;
-}
-
-
+        Map<String, String> cert = new HashMap<>();
+        String certId = "CERT-" + java.util.UUID.randomUUID().toString().substring(0, 8);
+        cert.put("certificateId", certId);
+        cert.put("studentId", student.getUserId()); // ← صححت getId() إلى getUserId()
+        cert.put("courseId", courseId);
+        cert.put("issueDate", LocalDate.now().toString());
+        
+        student.addCertificate(cert);
+        
+       
+        try {
+            db.saveUser(student);
+            db.saveCertificate(cert);
+        } catch (IOException e) {
+            System.err.println("Failed to save certificate: " + e.getMessage());
+        }
+        
+        return cert;
+    }
 }

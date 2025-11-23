@@ -1,8 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 import javax.swing.*;
+import java.awt.*;
+
 /**
  *
  * @author DANAH
@@ -12,28 +11,34 @@ public class InsightsFrame extends JFrame {
         setTitle("Instructor Insights");
         setSize(600, 400);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
 
         UserService userService = new UserService(new JsonDatabaseManager());
-        InstructorInsights data;
+        int[] data = null;
 
         try {
-            data = userService.getInstructorInsights(instructorId);
+            data = userService.getInstructorStatistics(instructorId);
         } catch (Exception ex) {
-            data = null;
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                "Failed to load instructor insights:\n" + ex.getMessage(),
+                "Error", JOptionPane.ERROR_MESSAGE);
         }
 
         JTextArea area = new JTextArea();
         area.setEditable(false);
+        area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 14));
 
-        if (data != null) {
+        if (data != null && data.length >= 3) {
             area.setText(
-                "Total Courses: " + data.totalCourses + "\n" +
-                "Total Students: " + data.totalStudents + "\n" +
-                "Average Quiz Score: " + data.averageQuiz
+                "Total Courses: " + data[0] + "\n" +
+                "Total Students: " + data[1] + "\n" +
+                "Average Quiz Score: " + data[2] + "%"  // لو بييجي كنسبة
             );
+        } else {
+            area.setText("No statistics available for this instructor.");
         }
 
         add(new JScrollPane(area));
     }
 }
-

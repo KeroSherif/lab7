@@ -1,61 +1,52 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Instructor Insights Dashboard
  */
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
-/**
- *
- * @author DANAH
- */
+
 public class InstructorInsightsFrame extends JFrame {
 
     public InstructorInsightsFrame(String instructorId) {
         setTitle("Instructor Insights");
-        setSize(500, 400);
+        setSize(550, 300);
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout());
 
         UserService userService = new UserService(JsonDatabaseManager.getInstance());
-
-        InstructorInsights insights;
+        int[] stats;
         try {
-            insights = userService.getInstructorInsights(instructorId);
+            stats = userService.getInstructorStatistics(instructorId);
         } catch (IOException e) {
-            insights = null;
+            stats = null;
         }
 
-        JTextArea area = new JTextArea();
-        area.setEditable(false);
+        JTextArea textArea = new JTextArea();
+        textArea.setEditable(false);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 14));
+        textArea.setMargin(new Insets(10, 10, 10, 10));
 
-        if (insights != null) {
-            area.setText(
-                    "=== Instructor Insights ===\n\n" +
-                    "Total Courses: " + insights.totalCourses + "\n" +
-                    "Total Students: " + insights.totalStudents + "\n" +
-                    "Average Quiz Score: " + insights.averageQuiz + "\n"
+        if (stats != null && stats.length >= 2) {
+            int createdCourses = stats[0];
+            int totalStudents = stats[1];
+            textArea.setText(
+                "=== Instructor Insights ===\n\n" +
+                "• Created Courses: " + createdCourses + "\n" +
+                "• Total Enrolled Students: " + totalStudents + "\n\n" +
+                "Note: Quiz analytics and charts will be available\n" +
+                "once quizzes are implemented in lessons."
             );
         } else {
-            area.setText("Error loading insights.");
+            textArea.setText("Error loading instructor statistics.");
         }
 
-        add(new JScrollPane(area), BorderLayout.CENTER);
-
-        JPanel buttons = new JPanel();
-        JButton progressChartBtn = new JButton("Progress Chart");
-        JButton quizChartBtn = new JButton("Quiz Averages Chart");
-
-        buttons.add(progressChartBtn);
-        buttons.add(quizChartBtn);
-        add(buttons, BorderLayout.SOUTH);
-
-        progressChartBtn.addActionListener(e -> {
-            new ProgressChartFrame(instructorId).setVisible(true);
-        });
-
-        quizChartBtn.addActionListener(e -> {
-            new QuizBarChartFrame(instructorId).setVisible(true);
-        });
+        add(new JScrollPane(textArea), BorderLayout.CENTER);
+       
+        JPanel buttonPanel = new JPanel();
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> dispose());
+        buttonPanel.add(closeButton);
+        add(buttonPanel, BorderLayout.SOUTH);
     }
 }
-

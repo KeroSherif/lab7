@@ -14,7 +14,9 @@ public class StudentService {
 
     
     public List<Course> getAllCourses() throws IOException {
-        return db.loadCourses();
+      return db.loadCourses().stream()
+            .filter(course -> course.getApprovalStatus() == Course.ApprovalStatus.APPROVED)
+            .toList();
     }
 
     

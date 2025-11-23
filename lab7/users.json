@@ -4,11 +4,9 @@
   "username" : "kero",
   "email" : "kero@gmail.com",
   "passwordHash" : "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-  "enrolledCourses" : [ "702", "704", "703" ],
+  "enrolledCourses" : [ "702" ],
   "progress" : {
-    "702" : [ ],
-    "704" : [ ],
-    "703" : [ "101", "102" ]
+    "702" : [ ]
   },
   "notifications" : [ "You completed the course: Linear Algebra on Sun Nov 16 22:38:04 EET 2025" ]
 }, {
@@ -17,5 +15,5 @@
   "username" : "kirolos",
   "email" : "kirolos@gmail.com",
   "passwordHash" : "8bb0cf6eb9b17d0f7d22b456f121257dc1254e1f01665370476383ea776df414",
-  "createdCourses" : [ "702", "703", "704" ]
+  "createdCourses" : [ ]
 } ]

@@ -12,9 +12,6 @@ import java.awt.event.ActionListener;
  */
 
 
-// لازم تتأكد إن Import لـ LoginService و JsonDatabaseManager موجود
-// import frontend.lab7.LoginService; // أو المكان اللي جايبين منه الكلاسات
-// import frontend.lab7.JsonDatabaseManager;
 
 public class SignupFrame extends JFrame {
 

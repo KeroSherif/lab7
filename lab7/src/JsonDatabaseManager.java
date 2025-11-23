@@ -190,6 +190,20 @@ public class JsonDatabaseManager {
     } catch (Exception e) {
         e.printStackTrace();
     }
+    public static void saveStudent(Student student) {
+    JSONArray students = readJsonArray("students.json");
+
+    for (int i = 0; i < students.length(); i++) {
+        JSONObject obj = students.getJSONObject(i);
+        if (obj.getString("id").equals(student.getId())) {
+            students.put(i, student.toJson());
+            break;
+        }
+    }
+
+    writeJsonArray("students.json", students);
+    }
+
 }
 
 }

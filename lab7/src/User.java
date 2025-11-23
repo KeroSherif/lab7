@@ -15,7 +15,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "role")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = Student.class, name = "student"),
-    @JsonSubTypes.Type(value = Instructor.class, name = "instructor")
+    @JsonSubTypes.Type(value = Instructor.class, name = "instructor"),
+    @JsonSubTypes.Type(value = Admin.class, name = "Admin")
 })
 public abstract class User {
     protected String userId;

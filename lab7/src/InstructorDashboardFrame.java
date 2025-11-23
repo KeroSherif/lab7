@@ -18,49 +18,38 @@ public class InstructorDashboardFrame extends JFrame {
     private JsonDatabaseManager dbManager;
 
     public InstructorDashboardFrame(User user) {
-        this.currentUser = user;
-        this.dbManager = JsonDatabaseManager.getInstance();
-        this.instructorService = new InstructorService(dbManager);
+       this.currentUser = user;
+    this.dbManager = JsonDatabaseManager.getInstance();
+    this.instructorService = new InstructorService(dbManager);
+    setTitle("Instructor Dashboard - " + user.getUsername());
+    setSize(600, 400);
+    setLocationRelativeTo(null);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setLayout(new GridLayout(6, 1)); 
 
-        setTitle("Instructor Dashboard - " + user.getUsername());
-        setSize(600, 400);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(5, 1));
+    JLabel title = new JLabel("Welcome " + user.getUsername() + "!", SwingConstants.CENTER);
+    title.setFont(new Font("Arial", Font.BOLD, 20));
+    add(title);
 
-        JLabel title = new JLabel("Welcome " + user.getUsername() + "!", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 20));
-        add(title);
+    JButton createBtn = new JButton("Create Course");
+    JButton manageBtn = new JButton("Manage Courses");
+    JButton viewStudentsBtn = new JButton("View Enrolled Students");
+    JButton myProfileBtn = new JButton("My Profile"); // ← جديد
+    JButton logoutBtn = new JButton("Logout");
 
-        JButton createBtn = new JButton("Create Course");
-        JButton manageBtn = new JButton("Manage Courses");
-        JButton viewStudentsBtn = new JButton("View Enrolled Students");
-        JButton logoutBtn = new JButton("Logout");
+    add(createBtn);
+    add(manageBtn);
+    add(viewStudentsBtn);
+    add(myProfileBtn); 
+    add(logoutBtn);
 
-        add(createBtn);
-        add(manageBtn);
-        add(viewStudentsBtn);
-        add(logoutBtn);
-
-        // Create Course
-        createBtn.addActionListener(e -> {
-            showCreateCourseDialog();
-        });
-
-        // Manage Courses
-        manageBtn.addActionListener(e -> {
-            showManageCoursesDialog();
-        });
-
-        // View Students
-        viewStudentsBtn.addActionListener(e -> {
-            showViewStudentsDialog();
-        });
-
-        // Logout
-        logoutBtn.addActionListener(e -> {
-            dispose();
-            new LoginFrame().setVisible(true);
+    createBtn.addActionListener(e -> showCreateCourseDialog());
+    manageBtn.addActionListener(e -> showManageCoursesDialog());
+    viewStudentsBtn.addActionListener(e -> showViewStudentsDialog());
+    myProfileBtn.addActionListener(e -> showMyProfile()); // ← موجود مسبقًا
+    logoutBtn.addActionListener(e -> {
+        dispose();
+        new LoginFrame().setVisible(true);
         });
     }
     //===================== show Quiz Dialog =====================

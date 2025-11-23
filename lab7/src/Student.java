@@ -82,4 +82,15 @@ public class Student extends User {
             completed.add(lessonId);
         }
     }
+    
+    private List<Map<String, String>> certificates = new ArrayList<>();
+
+    public List<Map<String, String>> getCertificates() {
+    return certificates;
+    }
+
+    public void addCertificate(Map<String, String> cert) {
+    certificates.add(cert);
+    }
+
 }

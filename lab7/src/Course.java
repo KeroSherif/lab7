@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Course {
+
     private String courseId;
     private String title;
     private String description;
@@ -32,6 +33,22 @@ public class Course {
         this.instructorId = instructorId;
         this.lessons = new ArrayList<>();
         this.students = new ArrayList<>();
+    }
+
+    public enum ApprovalStatus {
+        PENDING,
+        APPROVED,
+        REJECTED
+    }
+
+    private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
+
+    public ApprovalStatus getApprovalStatus() {
+        return approvalStatus;
+    }
+
+    public void setApprovalStatus(ApprovalStatus approvalStatus) {
+        this.approvalStatus = approvalStatus;
     }
 
     // Getters و Setters

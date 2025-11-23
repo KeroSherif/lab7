@@ -14,7 +14,9 @@ public class StudentService {
 
     
     public List<Course> getAllCourses() throws IOException {
-        return db.loadCourses();
+      return db.loadCourses().stream()
+            .filter(course -> course.getApprovalStatus() == Course.ApprovalStatus.APPROVED)
+            .toList();
     }
 
     
@@ -246,4 +248,31 @@ public class StudentService {
         System.out.println("StudentService: Found " + completedCourseIds.size() + " completed courses for student " + studentId);
         return completedCourseIds;
     }
+    public boolean isCourseCompleted(Student student, List<Lesson> lessons) {
+    for (Lesson lesson : lessons) {
+        if (!student.getPassedQuizzes().contains(lesson.getQuizId())) {
+            return false;
+        }
+    }
+    return true;
+    }
+    public Map<String, String> generateCertificate(Student student, String courseId) {
+    Map<String, String> cert = new HashMap<>();
+
+    String certId = "CERT-" + UUID.randomUUID().toString().substring(0, 8);
+
+    cert.put("certificateId", certId);
+    cert.put("studentId", student.getId());
+    cert.put("courseId", courseId);
+    cert.put("issueDate", LocalDate.now().toString());
+
+    student.addCertificate(cert);
+    JsonDatabaseManager.saveStudent(student);
+
+    JsonDatabaseManager.saveCertificate(cert);
+
+    return cert;
+}
+
+
 }

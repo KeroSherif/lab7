@@ -116,19 +116,16 @@ public class LoginFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-
-   private void showAdminSetupDialog() {
+private void showAdminSetupDialog() {
     JDialog dialog = new JDialog(this, "Create Admin Account", true);
     dialog.setSize(400, 300); 
     dialog.setLocationRelativeTo(this);
 
-    
     dialog.setLayout(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(5, 5, 5, 5);
     gbc.fill = GridBagConstraints.HORIZONTAL; 
 
-   
     JLabel userLabel = new JLabel("Username:");
     JTextField userField = new JTextField(20);
     gbc.gridx = 0; gbc.gridy = 0;
@@ -137,7 +134,6 @@ public class LoginFrame extends JFrame {
     gbc.gridx = 1; gbc.gridy = 0;
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(userField, gbc);
-
     
     JLabel emailLabel = new JLabel("Email:");
     JTextField emailField = new JTextField(20);
@@ -148,7 +144,6 @@ public class LoginFrame extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(emailField, gbc);
 
-   
     JLabel passLabel = new JLabel("Password:");
     JPasswordField passField = new JPasswordField(20);
     gbc.gridx = 0; gbc.gridy = 2;
@@ -158,7 +153,6 @@ public class LoginFrame extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(passField, gbc);
 
-    
     JLabel confirmLabel = new JLabel("Confirm Password:");
     JPasswordField confirmField = new JPasswordField(20);
     gbc.gridx = 0; gbc.gridy = 3;
@@ -168,46 +162,61 @@ public class LoginFrame extends JFrame {
     gbc.anchor = GridBagConstraints.WEST;
     dialog.add(confirmField, gbc);
 
-    
     JButton createBtn = new JButton("Create Admin");
     gbc.gridx = 0; gbc.gridy = 4;
-    gbc.gridwidth = 2; // يغطي عمودين
+    gbc.gridwidth = 2; 
     gbc.anchor = GridBagConstraints.CENTER;
     dialog.add(createBtn, gbc);
 
-   
     JButton cancelBtn = new JButton("Cancel");
     gbc.gridx = 0; gbc.gridy = 5;
     gbc.gridwidth = 2;
     gbc.anchor = GridBagConstraints.CENTER;
     dialog.add(cancelBtn, gbc);
 
-    
     createBtn.addActionListener(e -> {
         String user = userField.getText().trim();
         String email = emailField.getText().trim();
         String pass = new String(passField.getPassword());
         String confirm = new String(confirmField.getPassword());
 
-        if (user.isEmpty() || email.isEmpty() || pass.isEmpty()) {
-            JOptionPane.showMessageDialog(dialog, "All fields are required.");
-            return;
-        }
-        if (!pass.equals(confirm)) {
-            JOptionPane.showMessageDialog(dialog, "Passwords do not match.");
-            return;
-        }
-        if (pass.length() < 6) {
-            JOptionPane.showMessageDialog(dialog, "Password must be at least 6 characters.");
+        // 1. BASIC FORMAT VALIDATION
+        String error = Validation.validateUsername(user);
+        if (error.isEmpty()) error = Validation.validateEmail(email);
+        if (error.isEmpty()) error = Validation.validatePassword(pass);
+        if (error.isEmpty()) error = Validation.validatePasswordMatch(pass, confirm);
+
+        if (!error.isEmpty()) {
+            JOptionPane.showMessageDialog(dialog, error, "Validation Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
+            // 2. CHECK FOR DUPLICATE EMAIL (New Addition)
+            // We load the admins just to check the email, even if we overwrite later.
+            List<Admin> existingAdmins = dbManager.loadAdmins();
+            if (existingAdmins != null) {
+                for (Admin a : existingAdmins) {
+                    if (a.getEmail().equalsIgnoreCase(email)) {
+                        JOptionPane.showMessageDialog(dialog, 
+                            "This email is already used by another Admin.", 
+                            "Validation Error", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                }
+            }
+
+            // 3. SAVE NEW ADMIN
             String hash = PasswordEncryption.hashPassword(pass);
             Admin admin = new Admin("A1", user, email, hash);
-            dbManager.saveAdmins(List.of(admin));
+            
+            // WARNING: This still overwrites all other admins. 
+            // If you want to keep them, change List.of(admin) to existingAdmins.add(admin)
+            dbManager.saveAdmins(List.of(admin)); 
+            
             JOptionPane.showMessageDialog(dialog, "Admin account created successfully!\nNow log in with your credentials.");
             dialog.dispose();
+            
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(dialog, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }

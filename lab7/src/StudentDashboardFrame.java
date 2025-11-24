@@ -5,6 +5,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.List;
+import java.io.File;
+import java.io.FileWriter;
 
 public class StudentDashboardFrame extends JFrame {
 
@@ -532,7 +534,6 @@ public class StudentDashboardFrame extends JFrame {
                     return;
                 }
                 
-                // If we reach here, quiz is passed - lesson should already be marked complete
                 JOptionPane.showMessageDialog(dialog, 
                     " This lesson is already completed!\n\n" +
                     "You passed the quiz with " + currentScore, 
@@ -643,7 +644,7 @@ public class StudentDashboardFrame extends JFrame {
         }
     }
 
-    // ==================== View Certificates ====================
+    // ==================== View & Download Certificates (UPDATED) ====================
     private void showCertificates() {
         try {
             Student student = (Student) currentUser;
@@ -652,22 +653,106 @@ public class StudentDashboardFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "You have no certificates yet.", "Certificates", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            StringBuilder sb = new StringBuilder("=== My Certificates ===\n\n");
+
+            JDialog dialog = new JDialog(this, "My Certificates", true);
+            dialog.setSize(600, 400);
+            dialog.setLocationRelativeTo(this);
+            dialog.setLayout(new BorderLayout());
+
+            String[] columns = {"Certificate ID", "Course ID", "Issue Date"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0) {
+                @Override public boolean isCellEditable(int r, int c) { return false; }
+            };
+            
             for (Map<String, String> cert : certs) {
-                sb.append("Certificate ID: ").append(cert.get("certificateId")).append("\n")
-                        .append("Course ID: ").append(cert.get("courseId")).append("\n")
-                        .append("Issue Date: ").append(cert.get("issueDate")).append("\n")
-                        .append("-------------------------------\n");
+                model.addRow(new Object[]{
+                    cert.get("certificateId"), cert.get("courseId"), cert.get("issueDate")
+                });
             }
-            JTextArea area = new JTextArea(sb.toString());
-            area.setEditable(false);
-            area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-            JOptionPane.showMessageDialog(this, new JScrollPane(area), "My Certificates", JOptionPane.INFORMATION_MESSAGE);
+
+            JTable table = new JTable(model);
+            table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            dialog.add(new JScrollPane(table), BorderLayout.CENTER);
+
+            JPanel btnPanel = new JPanel();
+            JButton viewBtn = new JButton("View Selected");     // NEW BUTTON
+            JButton downloadBtn = new JButton("Download Selected");
+            JButton closeBtn = new JButton("Close");
+            
+            btnPanel.add(viewBtn);      // ADDED TO PANEL
+            btnPanel.add(downloadBtn);
+            btnPanel.add(closeBtn);
+            dialog.add(btnPanel, BorderLayout.SOUTH);
+
+            // --- VIEW BUTTON LOGIC ---
+            viewBtn.addActionListener(e -> {
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    JOptionPane.showMessageDialog(dialog, "Please select a certificate to view.");
+                    return;
+                }
+                String certId = (String) model.getValueAt(row, 0);
+                String courseId = (String) model.getValueAt(row, 1);
+                String date = (String) model.getValueAt(row, 2);
+                
+                String content = generateCertificateText(student.getUsername(), courseId, date, certId);
+                
+                JTextArea area = new JTextArea(content);
+                area.setEditable(false);
+                area.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+                JOptionPane.showMessageDialog(dialog, new JScrollPane(area), "Certificate Preview", JOptionPane.INFORMATION_MESSAGE);
+            });
+
+            // --- DOWNLOAD BUTTON LOGIC ---
+            downloadBtn.addActionListener(e -> {
+                int row = table.getSelectedRow();
+                if (row < 0) {
+                    JOptionPane.showMessageDialog(dialog, "Please select a certificate to download.");
+                    return;
+                }
+                
+                String certId = (String) model.getValueAt(row, 0);
+                String courseId = (String) model.getValueAt(row, 1);
+                String date = (String) model.getValueAt(row, 2);
+                
+                String content = generateCertificateText(student.getUsername(), courseId, date, certId);
+
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setSelectedFile(new File("Certificate_" + certId + ".txt"));
+                int userSelection = fileChooser.showSaveDialog(dialog);
+                
+                if (userSelection == JFileChooser.APPROVE_OPTION) {
+                    File fileToSave = fileChooser.getSelectedFile();
+                    try (FileWriter writer = new FileWriter(fileToSave)) {
+                        writer.write(content);
+                        JOptionPane.showMessageDialog(dialog, "Certificate saved successfully to:\n" + fileToSave.getAbsolutePath());
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(dialog, "Error saving file: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+
+            closeBtn.addActionListener(e -> dialog.dispose());
+            dialog.setVisible(true);
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading certificates: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    // Helper method to keep text consistent between View and Download
+    private String generateCertificateText(String username, String courseId, String date, String certId) {
+        return "========================================\n" +
+               "       CERTIFICATE OF COMPLETION        \n" +
+               "========================================\n\n" +
+               "This certifies that\n\n" +
+               "         " + username.toUpperCase() + "\n\n" +
+               "Has successfully completed the course:\n" +
+               "         " + courseId + "\n\n" +
+               "Date: " + date + "\n" +
+               "Certificate ID: " + certId + "\n\n" +
+               "========================================";
+    }
     // ==================== Profile & Auth ====================
     private void showMyProfile() {
         UserService userService = new UserService(dbManager);

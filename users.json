@@ -1,0 +1,77 @@
+[ {
+  "userId" : "U1",
+  "role" : "instructor",
+  "username" : "aaa",
+  "email" : "A@gmail.com",
+  "passwordHash" : "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+  "createdCourses" : [ "aw" ]
+}, {
+  "userId" : "U2",
+  "role" : "student",
+  "username" : "aaaa",
+  "email" : "aa@gmail.com",
+  "passwordHash" : "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+  "enrolledCourses" : [ "aw" ],
+  "progress" : {
+    "aw" : [ "awdawfwafaw", "awd" ]
+  },
+  "notifications" : [ ],
+  "certificates" : [ {
+    "studentId" : "U2",
+    "certificateId" : "CERT-13800c25",
+    "issueDate" : "2025-11-24",
+    "courseId" : "awd"
+  }, {
+    "studentId" : "U2",
+    "certificateId" : "CERT-a90fa345",
+    "issueDate" : "2025-11-24",
+    "courseId" : "awd"
+  }, {
+    "studentId" : "U2",
+    "certificateId" : "CERT-fcb16aa4",
+    "issueDate" : "2025-11-24",
+    "courseId" : "awd"
+  }, {
+    "studentId" : "U2",
+    "certificateId" : "CERT-3a52152e",
+    "issueDate" : "2025-11-24",
+    "courseId" : "awd"
+  }, {
+    "studentId" : "U2",
+    "certificateId" : "CERT-7c56343a",
+    "issueDate" : "2025-11-24",
+    "courseId" : "awd"
+  }, {
+    "studentId" : "U2",
+    "certificateId" : "CERT-9b2e0bb5",
+    "issueDate" : "2025-11-24",
+    "courseId" : "aw"
+  }, {
+    "studentId" : "U2",
+    "certificateId" : "CERT-04a5fa13",
+    "issueDate" : "2025-11-24",
+    "courseId" : "aw"
+  } ]
+}, {
+  "userId" : "U3",
+  "role" : "student",
+  "username" : "asd",
+  "email" : "d@gmail.com",
+  "passwordHash" : "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+  "enrolledCourses" : [ "aw" ],
+  "progress" : {
+    "aw" : [ "awdawfwafaw", "awd" ]
+  },
+  "notifications" : [ ],
+  "certificates" : [ {
+    "studentId" : "U3",
+    "certificateId" : "CERT-5d67105f",
+    "issueDate" : "2025-11-24",
+    "courseId" : "aw"
+  }, {
+    "studentId" : "U3",
+    "certificateId" : "CERT-4104a6a1",
+    "issueDate" : "2025-11-24",
+    "courseId" : "aw"
+  } ]
+} ]

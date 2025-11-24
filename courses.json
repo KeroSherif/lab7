@@ -1,0 +1,25 @@
+[ {
+  "courseId" : "aw",
+  "title" : "awdawd",
+  "description" : "awfawwaeaweawe",
+  "instructorId" : "U1",
+  "lessons" : [ {
+    "lessonId" : "awdawfwafaw",
+    "title" : "awdawfwafaw",
+    "content" : "awdawfwafaw",
+    "resources" : [ ],
+    "questions" : [ {
+      "questionText" : "awdawfwafaw",
+      "correctOptionIndex" : 0,
+      "options" : [ "1", "2", "3", "4" ]
+    } ]
+  }, {
+    "lessonId" : "awd",
+    "title" : "awdawfwafaw",
+    "content" : "awdawfwafawawdawfwafawawdawfwafaw",
+    "resources" : [ ],
+    "questions" : [ ]
+  } ],
+  "students" : [ "U2", "U3" ],
+  "approvalStatus" : "APPROVED"
+} ]

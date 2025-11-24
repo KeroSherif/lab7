@@ -1,0 +1,16 @@
+[ {
+  "studentId" : "U2",
+  "courseId" : "awd",
+  "lessonId" : "awdawfwafaw",
+  "score" : 100
+}, {
+  "studentId" : "U2",
+  "courseId" : "aw",
+  "lessonId" : "awdawfwafaw",
+  "score" : 100
+}, {
+  "studentId" : "U3",
+  "courseId" : "aw",
+  "lessonId" : "awdawfwafaw",
+  "score" : 100
+} ]

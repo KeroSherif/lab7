@@ -3,6 +3,8 @@
         "lib/**/*.jar",
         "c:\\Users\\Mohamed\\OneDrive\\Documents\\jackson-annotations-2.18.0.jar",
         "c:\\Users\\Mohamed\\OneDrive\\Documents\\jackson-core-2.18.0.jar",
-        "c:\\Users\\Mohamed\\OneDrive\\Documents\\jackson-databind-2.18.0.jar"
+        "c:\\Users\\Mohamed\\OneDrive\\Documents\\jackson-databind-2.18.0.jar",
+        "c:\\Users\\Mohamed\\OneDrive\\Documents\\jfreechart-1.0.19.jar",
+        "c:\\Users\\Mohamed\\OneDrive\\Documents\\jcommon-1.0.23.jar"
     ]
 }

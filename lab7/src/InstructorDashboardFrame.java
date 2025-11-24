@@ -154,12 +154,18 @@ public class InstructorDashboardFrame extends JFrame {
         JButton saveBtn = new JButton("Save Quiz");
 
         addBtn.addActionListener(e -> {
+            String qText = qField.getText().trim();
             List<String> opts = new ArrayList<>();
             opts.add(opt1.getText());
             opts.add(opt2.getText());
             opts.add(opt3.getText());
             opts.add(opt4.getText());
-            Question q = new Question(qField.getText(), opts, correctBox.getSelectedIndex());
+            String error = Validation.validateQuestion(qText, opts);
+            if (!error.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, error, "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return; // Stop here if invalid
+            }
+            Question q = new Question(qText, opts, correctBox.getSelectedIndex());
             tempQuestions.add(q);
             model.addRow(new Object[]{q.getQuestionText(), opts.get(q.getCorrectOptionIndex())});
             qField.setText("");

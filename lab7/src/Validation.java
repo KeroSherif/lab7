@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Validation {
     
     private static final int MIN_USERNAME_LENGTH = 3;
@@ -10,6 +12,33 @@ public class Validation {
     private static final int MAX_TITLE_LENGTH = 200;
     private static final int MAX_DESCRIPTION_LENGTH = 5000;
     
+    // Add to Validation.java
+    public static String validateQuestion(String questionText, List<String> options) {
+        if (questionText == null || questionText.trim().isEmpty()) {
+            return "Question text cannot be empty.";
+        }
+        
+        if (options == null || options.size() < 2) {
+            return "A question must have at least 2 options.";
+        }
+        
+        for (int i = 0; i < options.size(); i++) {
+            String opt = options.get(i);
+            if (opt == null || opt.trim().isEmpty()) {
+                return "Option " + (i + 1) + " cannot be empty.";
+            }
+        }
+        
+        // Optional: Check for duplicates
+        long distinctCount = options.stream().map(String::trim).distinct().count();
+        if (distinctCount != options.size()) {
+            return "All options must be unique.";
+        }
+        
+        return "";
+    }
+
+
     public static String validateUsername(String username) {
         if (username == null || username.trim().isEmpty()) {
             return "Username cannot be empty.";
